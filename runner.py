@@ -476,5 +476,5 @@ def index():
 
 if __name__ == '__main__':
     # app.run()
-    p = Process(target=app.run(processes=6))
+    p = Process(target=app.run(host='0.0.0.0',processes=6))
     p.start()
