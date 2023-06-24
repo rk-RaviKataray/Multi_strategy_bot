@@ -16,8 +16,8 @@ app = Flask(__name__)
 # logging.basicConfig(level=logging.DEBUG, filename="log.log", filemode="w")
 
 # User Credential
-user_id = ''
-api_key = ''
+user_id = '771791'
+api_key = 'jOf1uqDV2objI4Obj33QuoTN4Iz7qXD0mW5X0WgupaH8k9NvWV0hqifsdN6Rf1vmEmGEbHJsLq448Kkt6tU7u5qocJyOTQOYJAxxcq1dyqHzs1br5IGFnpsQrPUATctt'
 
 # Connect and get session Id
 alice = Aliceblue(user_id=user_id, api_key=api_key)
