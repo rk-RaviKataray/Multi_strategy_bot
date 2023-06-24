@@ -6,7 +6,7 @@ var intervalID = setInterval(update_values,1000);
   function update_values() {
         window.location.reload();
 
-        $.getJSON($SCRIPT_ROOT + '/_stuff',
+        $.getJSON('https://white-analyst-jjajl.ineuron.app:5000/_normal',
                
       function(data) {
 
@@ -25,7 +25,7 @@ var intervalID = setInterval(update_values,1000);
 
 </script>
 <body onload="update_values();">
-<h1><center>DASHBOARD</center></h1>
+<h1><center>DASHBOARD(normal)</center></h1>
 <p>
     <span id="summary">?</span>
     <h4><center>INDIVIDUAL INSTRUMENT DATA</center></h4>

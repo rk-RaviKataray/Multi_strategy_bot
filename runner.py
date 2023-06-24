@@ -472,7 +472,11 @@ def normal():
 
 @app.route('/')
 def index():
-    return render_template('dy1.html')
+    return render_template('normal.html')
+
+@app.route('/greedy')
+def greedy():
+    return render_template('greedy.html')
 
 if __name__ == '__main__':
     # app.run()
