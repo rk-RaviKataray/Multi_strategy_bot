@@ -3,8 +3,14 @@ import pandas as pd
 import datetime
 import pytz
 from enum import Enum
-import market_data
+import symbol_helper
 import expiry_data
+import multi_processing
+import market_data
+from multiprocessing import Process
+import quantity
+
+
 
 def create_N_call_objects_for_normal_strategy():
     global normal_strategy_N_call_obj_list
@@ -12,8 +18,8 @@ def create_N_call_objects_for_normal_strategy():
 
 
     for x in [5, 2, 1, 0]:
-        obj_ce = greed_strategy(
-            str(symbol_helper.get_symbol('NIFTY', market_data.get_nifty_atm, x * 100, 'C',expiry_format_nifty)),
+        obj_ce = normal_strategy(
+            str(symbol_helper.get_symbol('NIFTY', market_data.get_nifty_atm(), x * 100, 'C',expiry_format_nifty)),
             quantity.nifty_quantity)
         normal_strategy_N_call_obj_list.append(obj_ce)
 
@@ -24,8 +30,8 @@ def create_N_put_objects_for_normal_strategy():
 
 
     for x in [0, -1, -2, -5]:
-        obj_pe = greed_strategy(
-            str(symbol_helper.get_symbol('NIFTY', market_data.get_nifty_atm, x * 100, 'P', expiry_format_nifty)),
+        obj_pe = normal_strategy(
+            str(symbol_helper.get_symbol('NIFTY', market_data.get_nifty_atm(), x * 100, 'P', expiry_format_nifty)),
             quantity.nifty_quantity)
         normal_strategy_N_put_obj_list.append(obj_pe)
 
@@ -35,8 +41,8 @@ def create_BN_call_objects_for_normal_strategy():
 
 
     for x in [5,3,2, 1, 0]:
-        obj_ce = greed_strategy(
-            str(symbol_helper.get_symbol('BANKNIFTY', market_data.get_banknifty_atm, x * 100, 'C', expiry_format_banknifty)),
+        obj_ce = normal_strategy(
+            str(symbol_helper.get_symbol('BANKNIFTY', market_data.get_banknifty_atm(), x * 100, 'C', expiry_format_banknifty)),
             quantity.bank_nifty_quantity)
         normal_strategy_BN_call_obj_list.append(obj_ce)
 
@@ -47,8 +53,8 @@ def create_BN_put_objects_for_normal_strategy():
 
 
     for x in [0, -1, -2, -3, -5]:
-        obj_pe = greed_strategy(
-            str(symbol_helper.get_symbol('BANKNIFTY', market_data.get_banknifty_atm, x * 100, 'P', expiry_format_banknifty)),
+        obj_pe = normal_strategy(
+            str(symbol_helper.get_symbol('BANKNIFTY', market_data.get_banknifty_atm(), x * 100, 'P', expiry_format_banknifty)),
             quantity.bank_nifty_quantity)
         normal_strategy_BN_put_obj_list.append(obj_pe)
 
@@ -58,8 +64,8 @@ def create_FN_call_objects_for_normal_strategy():
 
 
     for x in [1, 0]:
-        obj_ce = greed_strategy(
-            str(symbol_helper.get_symbol('FINNIFTY', market_data.get_finnifty_atm, x * 100, 'C', expiry_format_finnifty)),
+        obj_ce = normal_strategy(
+            str(symbol_helper.get_symbol('FINNIFTY', market_data.get_finnifty_atm(), x * 100, 'C', expiry_format_finnifty)),
             quantity.finnifty_quantity)
         normal_strategy_FN_call_obj_list.append(obj_ce)
 
@@ -70,9 +76,9 @@ def create_FN_put_objects_for_normal_strategy():
 
 
     for x in [0, -1]:
-        obj_pe = greed_strategy(
-            str(symbol_helper.get_symbol('FINNIFTY', market_data.get_finnifty_atm, x * 100, 'P', expiry_format_finnifty)),
-            runner.finnifty_quantity)
+        obj_pe = normal_strategy(
+            str(symbol_helper.get_symbol('FINNIFTY', market_data.get_finnifty_atm(), x * 100, 'P', expiry_format_finnifty)),
+            quantity.finnifty_quantity)
         normal_strategy_FN_put_obj_list.append(obj_pe)
 
 
@@ -118,7 +124,7 @@ def execute_normal_startegy():
 class strategy_name(Enum):
     DATA = 0
     NORMAL = 1
-    normal = 2
+    GREEDY = 2
 
 
 class normal_strategy(threading.Thread):
@@ -206,8 +212,11 @@ class normal_strategy(threading.Thread):
                                 market_data.token_dict[self.symbol][strategy_name.DATA.value]["LP"])) * self.quantity)
                     # print(f'{self.symbol}calculating pnl sht')
 
-                if self.first_trade:
+
+
+                while self.first_trade:
                     self.go_short(-1, "First_trade")
+                    break
 
                 while not self.price_crossed_ema:
                     # print(f'{self.symbol} in not self.price_crossed_ema loop ')

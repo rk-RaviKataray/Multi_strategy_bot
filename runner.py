@@ -1,15 +1,18 @@
+import datetime
+import json
+from enum import Enum
+from multiprocessing import Process
+
+import pandas as pd
+import pytz
 from flask import Flask, jsonify, render_template
 from pya3 import *
-import pandas as pd
-import datetime
-import pytz
-import json
-from multiprocessing import Process
 from UltraDict import UltraDict
-from enum import Enum
-import greedy_strategy,normal_strategy
-import market_data
+
 import expiry_data
+import greedy_strategy
+import market_data
+import normal_strategy
 
 app = Flask(__name__)
 
@@ -71,7 +74,7 @@ print('next finnifty expiry is on {}'.format(expiry_data.get_finnifty_expiry()))
 
 market_data.socket(alice)
 
-
+import datetime
 print(
     "waiting for ATM at 9:20, current time- {}:{}".format(datetime.datetime.now(pytz.timezone('Asia/Kolkata')).hour,
                                                             datetime.datetime.now(
@@ -220,17 +223,17 @@ def greedy():
                    fch=round(market_data.token_dict[x][strategy_name.DATA.value]["FCH"], 2), noe=int(market_data.token_dict[x][strategy_name.GREEDY.value]["NOE"]))
 
         if x[0] == "N":
-            NIFTY_TOTAL_PNL_list.append(market_data.token_dict[x][strategy_name.DATA.value]["PNL"])
+            NIFTY_TOTAL_PNL_list.append(market_data.token_dict[x][strategy_name.GREEDY.value]["PNL"])
             NIFTY_TOTAL_BROKERAGE_list.append(market_data.token_dict[x][strategy_name.GREEDY.value]["BROKERAGE"])
             NIFTY_TOTAL_ENTRIES_list.append(market_data.token_dict[x][strategy_name.GREEDY.value]["NOE"])
 
         elif x[0] == "B":
-            BANKNIFTY_TOTAL_PNL_list.append(market_data.token_dict[x][strategy_name.DATA.value]["PNL"])
+            BANKNIFTY_TOTAL_PNL_list.append(market_data.token_dict[x][strategy_name.GREEDY.value]["PNL"])
             BANKNIFTY_TOTAL_BROKERAGE_list.append(market_data.token_dict[x][strategy_name.GREEDY.value]["BROKERAGE"])
             BANKNIFTY_TOTAL_ENTRIES_list.append(market_data.token_dict[x][strategy_name.GREEDY.value]["NOE"])
 
         elif x[0] == "F":
-            FINNIFTY_TOTAL_PNL_list.append(market_data.token_dict[x][strategy_name.DATA.value]["PNL"])
+            FINNIFTY_TOTAL_PNL_list.append(market_data.token_dict[x][strategy_name.GREEDY.value]["PNL"])
             FINNIFTY_TOTAL_BROKERAGE_list.append(market_data.token_dict[x][strategy_name.GREEDY.value]["BROKERAGE"])
             FINNIFTY_TOTAL_ENTRIES_list.append(market_data.token_dict[x][strategy_name.GREEDY.value]["NOE"])
 
@@ -366,17 +369,17 @@ def normal():
                    fch=round(market_data.token_dict[x][strategy_name.DATA.value]["FCH"], 2), noe=int(market_data.token_dict[x][strategy_name.NORMAL.value]["NOE"]))
 
         if x[0] == "N":
-            NIFTY_TOTAL_PNL_list.append(market_data.token_dict[x][strategy_name.DATA.value]["PNL"])
+            NIFTY_TOTAL_PNL_list.append(market_data.token_dict[x][strategy_name.NORMAL.value]["PNL"])
             NIFTY_TOTAL_BROKERAGE_list.append(market_data.token_dict[x][strategy_name.NORMAL.value]["BROKERAGE"])
             NIFTY_TOTAL_ENTRIES_list.append(market_data.token_dict[x][strategy_name.NORMAL.value]["NOE"])
 
         elif x[0] == "B":
-            BANKNIFTY_TOTAL_PNL_list.append(market_data.token_dict[x][strategy_name.DATA.value]["PNL"])
+            BANKNIFTY_TOTAL_PNL_list.append(market_data.token_dict[x][strategy_name.NORMAL.value]["PNL"])
             BANKNIFTY_TOTAL_BROKERAGE_list.append(market_data.token_dict[x][strategy_name.NORMAL.value]["BROKERAGE"])
             BANKNIFTY_TOTAL_ENTRIES_list.append(market_data.token_dict[x][strategy_name.NORMAL.value]["NOE"])
 
         elif x[0] == "F":
-            FINNIFTY_TOTAL_PNL_list.append(market_data.token_dict[x][strategy_name.DATA.value]["PNL"])
+            FINNIFTY_TOTAL_PNL_list.append(market_data.token_dict[x][strategy_name.NORMAL.value]["PNL"])
             FINNIFTY_TOTAL_BROKERAGE_list.append(market_data.token_dict[x][strategy_name.NORMAL.value]["BROKERAGE"])
             FINNIFTY_TOTAL_ENTRIES_list.append(market_data.token_dict[x][strategy_name.NORMAL.value]["NOE"])
 
@@ -474,11 +477,10 @@ def normal():
 def index():
     return render_template('normal.html')
 
-@app.route('/greedy')
-def greedy():
+@app.route('/greedy_frontend')
+def greedy_frontend():
     return render_template('greedy.html')
 
 if __name__ == '__main__':
     # app.run()
-    p = Process(target=app.run(host='0.0.0.0',processes=6))
-    p.start()
+    app.run(host='0.0.0.0',port=5000)

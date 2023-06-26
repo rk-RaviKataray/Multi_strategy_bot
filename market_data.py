@@ -1,8 +1,10 @@
-import UltraDict
-import json
 import datetime
+import json
+from enum import Enum
+
 import pytz
 from pya3 import *
+from UltraDict import UltraDict
 
 
 class strategy_name(Enum):
@@ -12,6 +14,8 @@ class strategy_name(Enum):
 
 
 def socket(alice):
+    import datetime
+
     global token_dict
     global LTP
     global socket_opened
@@ -48,24 +52,24 @@ def socket(alice):
 
     def socket_open():  # Socket open callback function
         print("Connected")
-        #global socket_opened
+        global socket_opened
         socket_opened = True
         if subscribe_flag:  # This is used to resubscribe the script when reconnect the socket.
             alice.subscribe(subscribe_list)
 
     def socket_close():  # On Socket close this callback function will trigger
-        #global socket_opened, LTP
+        global socket_opened, LTP
         socket_opened = False
         LTP = 0
         print("Closed")
 
     def socket_error(message):  # Socket Error Message will receive in this callback function
-        #global LTP
+        global LTP
         LTP = 0
         print("Error :", message)
 
     def feed_data(message):  # Socket feed data will receive in this callback function
-        #global LTP, subscribe_flag, token_dict
+        global LTP, subscribe_flag, token_dict
 
         feed_message = json.loads(message)
         if feed_message["t"] == "ck":
@@ -114,10 +118,8 @@ def socket(alice):
     # Socket Connection Request
     alice.start_websocket(socket_open_callback=socket_open, socket_close_callback=socket_close,
                           socket_error_callback=socket_error, subscription_callback=feed_data, run_in_background=True)
-    #global socket_opened
     while not socket_opened:
         pass
-    #global subscribe_list
 
     # Subscribe the Instrument
     print("Initial Subscribe for Index at :", datetime.datetime.now(pytz.timezone('Asia/Kolkata')))
@@ -130,26 +132,30 @@ def socket(alice):
 
 
 
-    def get_atm():
-        global nifty_atm
-        global banknifty_atm
-        global finnifty_atm
-        while True:
-            if datetime.datetime.now(pytz.timezone('Asia/Kolkata')).hour >= 9 \
-                    and datetime.datetime.now(pytz.timezone('Asia/Kolkata')).minute >= 00 \
-                    and datetime.datetime.now(pytz.timezone('Asia/Kolkata')).second >= 00:
-                #nifty_atm = int(round(float(token_dict['NIFTY_SPOT'][strategy_name.DATA.value]["LP"]), -2))
-                #banknifty_atm = int(round(float(token_dict['BANKNIFTY_SPOT'][strategy_name.DATA.value]["LP"]), -2))
-                #finnifty_atm = int(round(float(token_dict['FINNIFTY_SPOT'][strategy_name.DATA.value]["LP"]), -2))
-                nifty_atm=18600
-                banknifty_atm=43600
-                finnifty_atm=19500
+def get_atm():
+    import datetime
 
+    global nifty_atm
+    global banknifty_atm
+    global finnifty_atm
+    while True:
+        if datetime.datetime.now(pytz.timezone('Asia/Kolkata')).hour >= 0 \
+                and datetime.datetime.now(pytz.timezone('Asia/Kolkata')).minute >= 00 \
+                and datetime.datetime.now(pytz.timezone('Asia/Kolkata')).second >= 00:
+            #nifty_atm = int(round(float(token_dict['NIFTY_SPOT'][strategy_name.DATA.value]["LP"]), -2))
+            #banknifty_atm = int(round(float(token_dict['BANKNIFTY_SPOT'][strategy_name.DATA.value]["LP"]), -2))
+            #finnifty_atm = int(round(float(token_dict['FINNIFTY_SPOT'][strategy_name.DATA.value]["LP"]), -2))
 
-                print("nifty atm = {} \nBanknifty atm = {} \nFinnifty atm = {}".format(nifty_atm, banknifty_atm))
-                break
+            nifty_atm = 18600
+            banknifty_atm = 43000
+            finnifty_atm = 19300
         
-        return nifty_atm, banknifty_atm, finnifty_atm
+
+
+            print("nifty atm = {} \nBanknifty atm = {} \nFinnifty atm = {}".format(nifty_atm, banknifty_atm,finnifty_atm))
+            break
+    
+    return nifty_atm, banknifty_atm, finnifty_atm
 
 def get_nifty_atm():
     return nifty_atm
@@ -159,3 +165,5 @@ def get_banknifty_atm():
 
 def get_finnifty_atm():
     return finnifty_atm
+
+#

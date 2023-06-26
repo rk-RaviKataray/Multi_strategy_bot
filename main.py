@@ -18,4 +18,4 @@ time.sleep(5)
 
 
 print('**************************************STARTING STRATEGY!!!!!!!!!**************************************')
-run_strategy = subprocess.run(["python3", "bot.py"])
+run_strategy = subprocess.run(["python3", "runner.py"])

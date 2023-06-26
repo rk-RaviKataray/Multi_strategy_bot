@@ -24,7 +24,7 @@ def create_N_call_objects_for_greedy_strategy():
 
     for x in [5, 2, 1, 0]:
         obj_ce = greed_strategy(
-            str(symbol_helper.get_symbol('NIFTY', market_data.get_nifty_atm, x * 100, 'C',expiry_format_nifty)),
+            str(symbol_helper.get_symbol('NIFTY', market_data.get_nifty_atm(), x * 100, 'C',expiry_format_nifty)),
             quantity.nifty_quantity)
         greedy_strategy_N_call_obj_list.append(obj_ce)
 
@@ -36,7 +36,7 @@ def create_N_put_objects_for_greedy_strategy():
 
     for x in [0, -1, -2, -5]:
         obj_pe = greed_strategy(
-            str(symbol_helper.get_symbol('NIFTY', market_data.get_nifty_atm, x * 100, 'P', expiry_format_nifty)),
+            str(symbol_helper.get_symbol('NIFTY', market_data.get_nifty_atm(), x * 100, 'P', expiry_format_nifty)),
             quantity.nifty_quantity)
         greedy_strategy_N_put_obj_list.append(obj_pe)
 
@@ -47,7 +47,7 @@ def create_BN_call_objects_for_greedy_strategy():
 
     for x in [5,3,2, 1, 0]:
         obj_ce = greed_strategy(
-            str(symbol_helper.get_symbol('BANKNIFTY', market_data.get_banknifty_atm, x * 100, 'C', expiry_format_banknifty)),
+            str(symbol_helper.get_symbol('BANKNIFTY', market_data.get_banknifty_atm(), x * 100, 'C', expiry_format_banknifty)),
             quantity.bank_nifty_quantity)
         greedy_strategy_BN_call_obj_list.append(obj_ce)
 
@@ -59,7 +59,7 @@ def create_BN_put_objects_for_greedy_strategy():
 
     for x in [0, -1, -2, -3, -5]:
         obj_pe = greed_strategy(
-            str(symbol_helper.get_symbol('BANKNIFTY', market_data.get_banknifty_atm, x * 100, 'P', expiry_format_banknifty)),
+            str(symbol_helper.get_symbol('BANKNIFTY', market_data.get_banknifty_atm(), x * 100, 'P', expiry_format_banknifty)),
             quantity.bank_nifty_quantity)
         greedy_strategy_BN_put_obj_list.append(obj_pe)
 
@@ -70,7 +70,7 @@ def create_FN_call_objects_for_greedy_strategy():
 
     for x in [1, 0]:
         obj_ce = greed_strategy(
-            str(symbol_helper.get_symbol('FINNIFTY', market_data.get_finnifty_atm, x * 100, 'C', expiry_format_finnifty)),
+            str(symbol_helper.get_symbol('FINNIFTY', market_data.get_finnifty_atm(), x * 100, 'C', expiry_format_finnifty)),
             quantity.finnifty_quantity)
         greedy_strategy_FN_call_obj_list.append(obj_ce)
 
@@ -82,7 +82,7 @@ def create_FN_put_objects_for_greedy_strategy():
 
     for x in [0, -1]:
         obj_pe = greed_strategy(
-            str(symbol_helper.get_symbol('FINNIFTY', market_data.get_finnifty_atm, x * 100, 'P', expiry_format_finnifty)),
+            str(symbol_helper.get_symbol('FINNIFTY', market_data.get_finnifty_atm(), x * 100, 'P', expiry_format_finnifty)),
             quantity.finnifty_quantity)
         greedy_strategy_FN_put_obj_list.append(obj_pe)
 
@@ -166,7 +166,6 @@ class greed_strategy(threading.Thread):
         self.temp_closing_candle_variable = 0
 
     def run(self):
-        import runner
 
         #global market_data.token_dict
         start_time = int(9) * 60 * 60 + int(20) * 60 + int(30)
@@ -215,8 +214,10 @@ class greed_strategy(threading.Thread):
                                 market_data.token_dict[self.symbol][strategy_name.DATA.value]["LP"])) * self.quantity)
                     # print(f'{self.symbol}calculating pnl sht')
 
-                if self.first_trade:
+              
+                while self.first_trade:
                     self.go_short(-1, "First_trade")
+                    break
 
                 while not self.price_crossed_ema:
                     # print(f'{self.symbol} in not self.price_crossed_ema loop ')
