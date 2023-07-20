@@ -12,6 +12,7 @@ import logging
 import pathlib
 from multiprocessing import Process
 from UltraDict import UltraDict
+import retrying
 
 app = Flask(__name__)
 
@@ -53,18 +54,20 @@ token_dict['FINNIFTY_SPOT'] = {"TOKEN": 0, "LP": 0.0, "POS": "", "PNL": 0.0, "LA
 
 socket_opened = False
 subscribe_flag = False
+global subscribe_list
 subscribe_list = []
 unsubscribe_list = []
 Nifty_spot = 0
 BankNifty_spot = 0
-nifty_atm = 0
-banknifty_atm = 0
+#nifty_atm = 0
+#banknifty_atm = 0
+#finnifty_atm = 0
 # expiry_nifty = []
 # expiry_banknifty = []
 # expiry_finnifty = []
-nifty_quantity = 50
-bank_nifty_quantity = 25
-finnifty_quantity = 40
+nifty_quantity = 500
+bank_nifty_quantity = 300
+finnifty_quantity = 160
 NIFTY_TOTAL_PNL = 0
 NIFTY_TOTAL_BROKERAGE = 0
 NIFTY_NET_PNL = 0
@@ -108,7 +111,7 @@ def socket():
         global socket_opened
         socket_opened = True
         if subscribe_flag:  # This is used to resubscribe the script when reconnect the socket.
-            alice.subscribe(subscribe_list)
+            alice.subscribe(get_subscribe_list(banknifty_atm,nifty_atm,finnifty_atm,expiry_banknifty[0],expiry_nifty[0],expiry_finnifty[0]))
 
     def socket_close():  # On Socket close this callback function will trigger
         global socket_opened, LTP
@@ -232,10 +235,10 @@ class check_entries(threading.Thread):
     def run(self):
 
         global token_dict
-        start_time = int(9) * 60 * 60 + int(20) * 60 + int(30)
+        start_time = int(9) * 60 * 60 + int(29) * 60 + int(58)
         time_now = (datetime.datetime.now(pytz.timezone('Asia/Kolkata')).hour * 60 * 60 + datetime.datetime.now(
             pytz.timezone('Asia/Kolkata')).minute * 60 + datetime.datetime.now(pytz.timezone('Asia/Kolkata')).second)
-        end_time = int(15) * 60 * 60 + int(30) * 60 + int(59)
+        end_time = int(15) * 60 * 60 + int(20) * 60 + int(59)
         token_dict[self.symbol]['PNL'] = 0.0
         token_dict[self.symbol]['LAST_ENTRY'] = 0.0
         token_dict[self.symbol]['NOE'] = 0
@@ -269,9 +272,9 @@ class check_entries(threading.Thread):
         interval = "1"  # ["1", "D"]
         indices = False  # For Getting index data
         df_ = alice.get_historical(instrument, from_datetime, to_datetime, interval, indices)
-        self.first_candle_high = max(df_.head(5)['high'])
+        self.first_candle_high = max(df_.head(15)['high'])
         token_dict[self.symbol]["FCH"] = self.first_candle_high
-        self.closing_price.append(df_['close'][4])
+        self.closing_price.append(df_['close'][14])
         while True:
             while start_time < \
                     (datetime.datetime.now(pytz.timezone('Asia/Kolkata')).hour * 60 * 60 + datetime.datetime.now(
@@ -285,7 +288,7 @@ class check_entries(threading.Thread):
                 self.price = float(token_dict[self.symbol]["LP"])
                 #print(f'{self.symbol}beginning of the loop')
 
-                if (datetime.datetime.now(pytz.timezone('Asia/Kolkata')).minute % 5) == 4 and datetime.datetime.now(
+                if (datetime.datetime.now(pytz.timezone('Asia/Kolkata')).minute % 15) == 14 and datetime.datetime.now(
                         pytz.timezone('Asia/Kolkata')).second == 59:
                     self.closing_price.append(float(token_dict[self.symbol]["LP"]))
                     #print('{} candle closing price at time {} is {}'.format(self.symbol, datetime.datetime.now(
@@ -342,7 +345,7 @@ class check_entries(threading.Thread):
                             if pos_close:
                                 while True:
                                     if (datetime.datetime.now(
-                                            pytz.timezone('Asia/Kolkata')).minute % 5) == 4 and datetime.datetime.now(
+                                            pytz.timezone('Asia/Kolkata')).minute % 15) == 14 and datetime.datetime.now(
                                         pytz.timezone('Asia/Kolkata')).second == 58:
                                         self.temp_closing_candle_variable = token_dict[self.symbol]["LP"]
                                         #print(f'{self.symbol}waiting for candle too close')
@@ -410,7 +413,7 @@ class check_entries(threading.Thread):
                             self.close_short_pos(self.first_candle_high)
                             while True:
                                 if (datetime.datetime.now(
-                                        pytz.timezone('Asia/Kolkata')).minute % 5) == 4 and datetime.datetime.now(
+                                        pytz.timezone('Asia/Kolkata')).minute % 15) == 14 and datetime.datetime.now(
                                     pytz.timezone('Asia/Kolkata')).second == 58:
                                     self.temp_closing_candle_variable = token_dict[self.symbol]["LP"]
                                     #print(f'{self.symbol}waiting for candle to close')
@@ -460,7 +463,7 @@ class check_entries(threading.Thread):
                         if pos_close:
                             while True:
                                 if (datetime.datetime.now(
-                                        pytz.timezone('Asia/Kolkata')).minute % 5) == 4 and datetime.datetime.now(
+                                        pytz.timezone('Asia/Kolkata')).minute % 15) == 14 and datetime.datetime.now(
                                     pytz.timezone('Asia/Kolkata')).second == 58:
                                     self.temp_closing_candle_variable = token_dict[self.symbol]["LP"]
                                     #print(f'{self.symbol} waiting for candle to close')
@@ -482,7 +485,7 @@ class check_entries(threading.Thread):
 
                         while True:
                             if (datetime.datetime.now(
-                                    pytz.timezone('Asia/Kolkata')).minute % 5) == 4 and datetime.datetime.now(
+                                    pytz.timezone('Asia/Kolkata')).minute % 15) == 14 and datetime.datetime.now(
                                 pytz.timezone('Asia/Kolkata')).second == 58:
                                 self.temp_closing_candle_variable = token_dict[self.symbol]["LP"]
                                 #print(f'{self.symbol}waiting for candle to close')
@@ -546,7 +549,7 @@ class check_entries(threading.Thread):
                                                                        datetime.datetime.now(
                                                                            pytz.timezone(
                                                                                'Asia/Kolkata')).second))
-                token_dict[self.symbol]['LAST_ENTRY'] = self.price
+                token_dict[self.symbol]['LAST_ENTRY'] = float(token_dict[self.symbol]["LP"])
                 self.long_entry_price.append(float(token_dict[self.symbol]["LP"]))
                 # self.short_exit_price.append(float(token_dict[self.symbol]["LP"]))
 
@@ -566,7 +569,7 @@ class check_entries(threading.Thread):
 
     def go_short(self, pivot, reason):
         #print(f'{self.symbol}in sht func')
-        if self.first_trade:
+        while self.first_trade:
             #print(f'{self.symbol}in self.first_trade:')
             self.short_entry_price.append(self.price)
             print('{} went short at price-{}, time-{}:{}:{}'.format(self.symbol,
@@ -582,6 +585,7 @@ class check_entries(threading.Thread):
             token_dict[self.symbol]["POS"] = "SHORT"
             token_dict[self.symbol]["NOE"] = token_dict[self.symbol]["NOE"] + 1
             token_dict[self.symbol]["LAST_ENTRY"] = self.price
+            break
 
             # if len(self.long_entry_price) == len(self.long_exit_price):
             #    self.long_pnl_booked = (self.long_pnl_booked + (
@@ -679,6 +683,7 @@ class check_entries(threading.Thread):
         return False
 
     def hedge(self):
+        go_long(0,'HEDGE')
         print('HEDGE-{} went long at price-{}, time-{}:{}:{}'.format(self.symbol,
                                                                      self.price,
                                                                      datetime.datetime.now(
@@ -687,24 +692,16 @@ class check_entries(threading.Thread):
                                                                          pytz.timezone('Asia/Kolkata')).minute,
                                                                      datetime.datetime.now(
                                                                          pytz.timezone('Asia/Kolkata')).second))
-        self.hedge_entry_price.append(token_dict[self.symbol]["LP"])
-        token_dict[self.symbol]["NOE"] = 0
 
         start_time = int(9) * 60 * 60 + int(19) * 60 + int(30)
         time_now = (datetime.datetime.now(pytz.timezone('Asia/Kolkata')).hour * 60 * 60 + datetime.datetime.now(
             pytz.timezone('Asia/Kolkata')).minute * 60 + datetime.datetime.now(pytz.timezone('Asia/Kolkata')).second)
-        end_time = int(15) * 60 * 60 + int(18) * 60 + int(59)
-        token_dict[self.symbol]['LAST_ENTRY'] = self.price
-        token_dict[self.symbol]["LONG"] = True
-        token_dict[self.symbol]["NOE"] = token_dict[self.symbol]["NOE"] + 1
-        self.lng = True
-        token_dict[self.symbol]['POS'] = 'LONG'
+        end_time = int(15) * 60 * 60 + int(30) * 60 + int(59)     
 
         while start_time <= time_now <= end_time:
             time_now = (datetime.datetime.now(pytz.timezone('Asia/Kolkata')).hour * 60 * 60 + datetime.datetime.now(
                 pytz.timezone('Asia/Kolkata')).minute * 60 + datetime.datetime.now(
                 pytz.timezone('Asia/Kolkata')).second)
-            token_dict[self.symbol]['LP'] = self.price
             if self.lng == True:
                 token_dict[self.symbol]['PNL'] = (
                         (token_dict[self.symbol]['LP'] - token_dict[self.symbol]['LAST_ENTRY']) * self.quantity)
@@ -947,6 +944,98 @@ def stuff():
 def index():
     return render_template('dy1.html')
 
+def get_subscribe_list(banknifty_atm,nifty_atm,finnifty_atm,expiry_banknifty,expiry_nifty,expiry_finnifty):
+    subscribe_list = [alice.get_instrument_by_token('INDICES', 26000),  # nifty spot
+                      alice.get_instrument_by_token('INDICES', 26009),  # banknifty spot
+                      alice.get_instrument_by_token('INDICES', 26037),  # NSE,NIFTY FIN SERVICE,26037
+
+                      alice.get_instrument_for_fno(exch='NFO', symbol='BANKNIFTY', expiry_date=str(expiry_banknifty),
+                                                   is_fut=False, strike=int(banknifty_atm) - 600, is_CE=False),
+                   
+
+                      alice.get_instrument_for_fno(exch='NFO', symbol='BANKNIFTY', expiry_date=str(expiry_banknifty),
+                                                   is_fut=False, strike=int(banknifty_atm) - 400, is_CE=False),
+                
+
+                      alice.get_instrument_for_fno(exch='NFO', symbol='BANKNIFTY', expiry_date=str(expiry_banknifty),
+                                                   is_fut=False, strike=int(banknifty_atm) - 200, is_CE=False),
+
+                      alice.get_instrument_for_fno(exch='NFO', symbol='BANKNIFTY', expiry_date=str(expiry_banknifty),
+                                                   is_fut=False, strike=int(banknifty_atm),
+                                                   is_CE=False),  # change expir
+                      alice.get_instrument_for_fno(exch='NFO', symbol='BANKNIFTY', expiry_date=str(expiry_banknifty),
+                                                   is_fut=False, strike=int(banknifty_atm), is_CE=True),
+                      alice.get_instrument_for_fno(exch='NFO', symbol='BANKNIFTY', expiry_date=str(expiry_banknifty),
+                                                   is_fut=False, strike=int(banknifty_atm) + 200, is_CE=True),
+                      #alice.get_instrument_for_fno(exch='NFO', symbol='BANKNIFTY', expiry_date=str(expiry_banknifty[0]),
+                      #                             is_fut=False, strike=int(banknifty_atm) + 100, is_CE=False),
+                      alice.get_instrument_for_fno(exch='NFO', symbol='BANKNIFTY', expiry_date=str(expiry_banknifty),
+                                                   is_fut=False, strike=int(banknifty_atm) + 400, is_CE=True),
+
+                      #alice.get_instrument_for_fno(exch='NFO', symbol='BANKNIFTY', expiry_date=str(expiry_banknifty[0]),
+                      #                             is_fut=False, strike=int(banknifty_atm) + 200, is_CE=False),
+                      alice.get_instrument_for_fno(exch='NFO', symbol='BANKNIFTY', expiry_date=str(expiry_banknifty),
+                                                   is_fut=False, strike=int(banknifty_atm) + 600, is_CE=True),
+
+                      #alice.get_instrument_for_fno(exch='NFO', symbol='BANKNIFTY', expiry_date=str(expiry_banknifty[0]),
+                      #                             is_fut=False, strike=int(banknifty_atm) + 300, is_CE=False),
+
+                      #alice.get_instrument_for_fno(exch='NFO', symbol='BANKNIFTY', expiry_date=str(expiry_banknifty[0]),
+                      #                             is_fut=False, strike=int(banknifty_atm) - 100, is_CE=True),
+
+                      
+
+                      #alice.get_instrument_for_fno(exch='NFO', symbol='BANKNIFTY', expiry_date=str(expiry_banknifty[0]),
+                      #                             is_fut=False, strike=int(banknifty_atm) - 600, is_CE=False),
+                      # BN Hedge PE
+
+                      #alice.get_instrument_for_fno(exch='NFO', symbol='BANKNIFTY', expiry_date=str(expiry_banknifty[0]),
+                      #                             is_fut=False, strike=int(banknifty_atm) + 600, is_CE=True),
+                      # BN Hedge CE
+                      alice.get_instrument_for_fno(exch='NFO', symbol='NIFTY', expiry_date=str(expiry_nifty),
+                                                   is_fut=False, strike=int(nifty_atm) - 200, is_CE=False),
+                
+                      alice.get_instrument_for_fno(exch='NFO', symbol='NIFTY', expiry_date=str(expiry_nifty),
+                                                   is_fut=False, strike=int(nifty_atm) - 100, is_CE=False),
+                      alice.get_instrument_for_fno(exch='NFO', symbol='NIFTY', expiry_date=str(expiry_nifty),
+                                                   is_fut=False, strike=int(nifty_atm), is_CE=False),  # change expiry
+                      #
+                      alice.get_instrument_for_fno(exch='NFO', symbol='NIFTY', expiry_date=str(expiry_nifty),
+                                                   is_fut=False, strike=int(nifty_atm), is_CE=True),
+
+                      alice.get_instrument_for_fno(exch='NFO', symbol='NIFTY', expiry_date=str(expiry_nifty),
+                                                   is_fut=False, strike=int(nifty_atm) + 100, is_CE=True),
+                      #alice.get_instrument_for_fno(exch='NFO', symbol='NIFTY', expiry_date=str(expiry_nifty[0]),
+                      #                             is_fut=False, strike=int(nifty_atm) + 100, is_CE=False),
+                      alice.get_instrument_for_fno(exch='NFO', symbol='NIFTY', expiry_date=str(expiry_nifty),
+                                                   is_fut=False, strike=int(nifty_atm) + 200, is_CE=True),
+                      #alice.get_instrument_for_fno(exch='NFO', symbol='NIFTY', expiry_date=str(expiry_nifty[0]),
+                      #                             is_fut=False, strike=int(nifty_atm) + 200, is_CE=False),
+                      #alice.get_instrument_for_fno(exch='NFO', symbol='NIFTY', expiry_date=str(expiry_nifty[0]),
+                      #                             is_fut=False, strike=int(nifty_atm) - 100, is_CE=True),
+                      
+                      #alice.get_instrument_for_fno(exch='NFO', symbol='NIFTY', expiry_date=str(expiry_nifty[0]),
+                      #                             is_fut=False, strike=int(nifty_atm) - 500, is_CE=False),
+                      # #NIFTY Hedge Pe
+                      #alice.get_instrument_for_fno(exch='NFO', symbol='NIFTY', expiry_date=str(expiry_nifty[0]),
+                      #                             is_fut=False, strike=int(nifty_atm) + 500, is_CE=True),
+                      # #NIFTY Hedge CE
+                      alice.get_instrument_for_fno(exch='NFO', symbol='FINNIFTY', expiry_date=str(expiry_finnifty),
+                                                   is_fut=False, strike=int(finnifty_atm) - 100, is_CE=False),
+                      alice.get_instrument_for_fno(exch='NFO', symbol='FINNIFTY', expiry_date=str(expiry_finnifty),
+                                                   is_fut=False, strike=int(finnifty_atm), is_CE=False),
+                      alice.get_instrument_for_fno(exch='NFO', symbol='FINNIFTY', expiry_date=str(expiry_finnifty),
+                                                   is_fut=False, strike=int(finnifty_atm), is_CE=True),
+                      alice.get_instrument_for_fno(exch='NFO', symbol='FINNIFTY', expiry_date=str(expiry_finnifty),
+                                                   is_fut=False, strike=int(finnifty_atm) + 100, is_CE=True)
+                      #alice.get_instrument_for_fno(exch='NFO', symbol='FINNIFTY', expiry_date=str(expiry_finnifty[0]),
+                      #                             is_fut=False, strike=int(finnifty_atm) + 100, is_CE=False),
+                      #alice.get_instrument_for_fno(exch='NFO', symbol='FINNIFTY', expiry_date=str(expiry_finnifty[0]),
+                      #                             is_fut=False, strike=int(finnifty_atm) - 100, is_CE=True),
+                      
+                      ]
+    return subscribe_list
+
 
 if __name__ == '__main__':
 
@@ -986,112 +1075,32 @@ if __name__ == '__main__':
                                                               datetime.datetime.now(
                                                                   pytz.timezone('Asia/Kolkata')).minute))
     if datetime.datetime.now(pytz.timezone('Asia/Kolkata')).hour >= 9 \
-                and datetime.datetime.now(pytz.timezone('Asia/Kolkata')).minute > 21:
+                and datetime.datetime.now(pytz.timezone('Asia/Kolkata')).minute >= 31:
                 min = 0
     else:
-        min = 21
+        min = 31
     while True:
         if datetime.datetime.now(pytz.timezone('Asia/Kolkata')).hour >= 9 \
-                and datetime.datetime.now(pytz.timezone('Asia/Kolkata')).minute >= min \
+                and datetime.datetime.now(pytz.timezone('Asia/Kolkata')).minute >= 31 \
                 and datetime.datetime.now(pytz.timezone('Asia/Kolkata')).second >= 00:
+
+            global nifty_atm,banknifty_atm,finnifty_atm
             nifty_atm = int(round(float(token_dict['NIFTY_SPOT']["LP"]), -2))
             banknifty_atm = int(round(float(token_dict['BANKNIFTY_SPOT']["LP"]), -2))
             finnifty_atm = int(round(float(token_dict['FINNIFTY_SPOT']["LP"]), -2))
 
+            #nifty_atm = 19000
+            #banknifty_atm = 43000
+            #finnifty_atm = 19500
+
             print("nifty atm = {} \nBanknifty atm = {} ".format(nifty_atm, banknifty_atm))
             break
 
-    subscribe_list = [alice.get_instrument_by_token('INDICES', 26000),  # nifty spot
-                      alice.get_instrument_by_token('INDICES', 26009),  # banknifty spot
-                      alice.get_instrument_by_token('INDICES', 26037),  # NSE,NIFTY FIN SERVICE,26037
 
-                      alice.get_instrument_for_fno(exch='NFO', symbol='BANKNIFTY', expiry_date=str(expiry_banknifty[0]),
-                                                   is_fut=False, strike=int(banknifty_atm),
-                                                   is_CE=True),  # change expir
-                      alice.get_instrument_for_fno(exch='NFO', symbol='BANKNIFTY', expiry_date=str(expiry_banknifty[0]),
-                                                   is_fut=False, strike=int(banknifty_atm), is_CE=False),
-                      alice.get_instrument_for_fno(exch='NFO', symbol='BANKNIFTY', expiry_date=str(expiry_banknifty[0]),
-                                                   is_fut=False, strike=int(banknifty_atm) + 100, is_CE=True),
-                      alice.get_instrument_for_fno(exch='NFO', symbol='BANKNIFTY', expiry_date=str(expiry_banknifty[0]),
-                                                   is_fut=False, strike=int(banknifty_atm) + 100, is_CE=False),
-                      alice.get_instrument_for_fno(exch='NFO', symbol='BANKNIFTY', expiry_date=str(expiry_banknifty[0]),
-                                                   is_fut=False, strike=int(banknifty_atm) + 200, is_CE=True),
-
-                      alice.get_instrument_for_fno(exch='NFO', symbol='BANKNIFTY', expiry_date=str(expiry_banknifty[0]),
-                                                   is_fut=False, strike=int(banknifty_atm) + 200, is_CE=False),
-                      alice.get_instrument_for_fno(exch='NFO', symbol='BANKNIFTY', expiry_date=str(expiry_banknifty[0]),
-                                                   is_fut=False, strike=int(banknifty_atm) + 300, is_CE=True),
-
-                      alice.get_instrument_for_fno(exch='NFO', symbol='BANKNIFTY', expiry_date=str(expiry_banknifty[0]),
-                                                   is_fut=False, strike=int(banknifty_atm) + 300, is_CE=False),
-
-                      alice.get_instrument_for_fno(exch='NFO', symbol='BANKNIFTY', expiry_date=str(expiry_banknifty[0]),
-                                                   is_fut=False, strike=int(banknifty_atm) - 100, is_CE=True),
-
-                      alice.get_instrument_for_fno(exch='NFO', symbol='BANKNIFTY', expiry_date=str(expiry_banknifty[0]),
-                                                   is_fut=False, strike=int(banknifty_atm) - 100, is_CE=False),
-                      alice.get_instrument_for_fno(exch='NFO', symbol='BANKNIFTY', expiry_date=str(expiry_banknifty[0]),
-                                                   is_fut=False, strike=int(banknifty_atm) - 200, is_CE=True),
-
-                      alice.get_instrument_for_fno(exch='NFO', symbol='BANKNIFTY', expiry_date=str(expiry_banknifty[0]),
-                                                   is_fut=False, strike=int(banknifty_atm) - 200, is_CE=False),
-                      alice.get_instrument_for_fno(exch='NFO', symbol='BANKNIFTY', expiry_date=str(expiry_banknifty[0]),
-                                                   is_fut=False, strike=int(banknifty_atm) - 300, is_CE=True),
-
-                      alice.get_instrument_for_fno(exch='NFO', symbol='BANKNIFTY', expiry_date=str(expiry_banknifty[0]),
-                                                   is_fut=False, strike=int(banknifty_atm) - 300, is_CE=False),
-
-                      alice.get_instrument_for_fno(exch='NFO', symbol='BANKNIFTY', expiry_date=str(expiry_banknifty[0]),
-                                                   is_fut=False, strike=int(banknifty_atm) - 600, is_CE=False),
-                      # BN Hedge PE
-
-                      alice.get_instrument_for_fno(exch='NFO', symbol='BANKNIFTY', expiry_date=str(expiry_banknifty[0]),
-                                                   is_fut=False, strike=int(banknifty_atm) + 600, is_CE=True),
-                      # BN Hedge CE
-
-                      alice.get_instrument_for_fno(exch='NFO', symbol='NIFTY', expiry_date=str(expiry_nifty[0]),
-                                                   is_fut=False, strike=int(nifty_atm), is_CE=True),  # change expiry
-                      #
-                      alice.get_instrument_for_fno(exch='NFO', symbol='NIFTY', expiry_date=str(expiry_nifty[0]),
-                                                   is_fut=False, strike=int(nifty_atm), is_CE=False),
-
-                      alice.get_instrument_for_fno(exch='NFO', symbol='NIFTY', expiry_date=str(expiry_nifty[0]),
-                                                   is_fut=False, strike=int(nifty_atm) + 100, is_CE=True),
-                      alice.get_instrument_for_fno(exch='NFO', symbol='NIFTY', expiry_date=str(expiry_nifty[0]),
-                                                   is_fut=False, strike=int(nifty_atm) + 100, is_CE=False),
-                      alice.get_instrument_for_fno(exch='NFO', symbol='NIFTY', expiry_date=str(expiry_nifty[0]),
-                                                   is_fut=False, strike=int(nifty_atm) + 200, is_CE=True),
-                      alice.get_instrument_for_fno(exch='NFO', symbol='NIFTY', expiry_date=str(expiry_nifty[0]),
-                                                   is_fut=False, strike=int(nifty_atm) + 200, is_CE=False),
-                      alice.get_instrument_for_fno(exch='NFO', symbol='NIFTY', expiry_date=str(expiry_nifty[0]),
-                                                   is_fut=False, strike=int(nifty_atm) - 100, is_CE=True),
-                      alice.get_instrument_for_fno(exch='NFO', symbol='NIFTY', expiry_date=str(expiry_nifty[0]),
-                                                   is_fut=False, strike=int(nifty_atm) - 100, is_CE=False),
-                      alice.get_instrument_for_fno(exch='NFO', symbol='NIFTY', expiry_date=str(expiry_nifty[0]),
-                                                   is_fut=False, strike=int(nifty_atm) - 200, is_CE=True),
-                      alice.get_instrument_for_fno(exch='NFO', symbol='NIFTY', expiry_date=str(expiry_nifty[0]),
-                                                   is_fut=False, strike=int(nifty_atm) - 200, is_CE=False),
-                      alice.get_instrument_for_fno(exch='NFO', symbol='NIFTY', expiry_date=str(expiry_nifty[0]),
-                                                   is_fut=False, strike=int(nifty_atm) - 500, is_CE=False),
-                      # #NIFTY Hedge Pe
-                      alice.get_instrument_for_fno(exch='NFO', symbol='NIFTY', expiry_date=str(expiry_nifty[0]),
-                                                   is_fut=False, strike=int(nifty_atm) + 500, is_CE=True),
-                      # #NIFTY Hedge CE
-                      alice.get_instrument_for_fno(exch='NFO', symbol='FINNIFTY', expiry_date=str(expiry_finnifty[0]),
-                                                   is_fut=False, strike=int(finnifty_atm), is_CE=True),
-                      alice.get_instrument_for_fno(exch='NFO', symbol='FINNIFTY', expiry_date=str(expiry_finnifty[0]),
-                                                   is_fut=False, strike=int(finnifty_atm), is_CE=False),
-                      alice.get_instrument_for_fno(exch='NFO', symbol='FINNIFTY', expiry_date=str(expiry_finnifty[0]),
-                                                   is_fut=False, strike=int(finnifty_atm) + 100, is_CE=True),
-                      alice.get_instrument_for_fno(exch='NFO', symbol='FINNIFTY', expiry_date=str(expiry_finnifty[0]),
-                                                   is_fut=False, strike=int(finnifty_atm) + 100, is_CE=False),
-                      alice.get_instrument_for_fno(exch='NFO', symbol='FINNIFTY', expiry_date=str(expiry_finnifty[0]),
-                                                   is_fut=False, strike=int(finnifty_atm) - 100, is_CE=True),
-                      alice.get_instrument_for_fno(exch='NFO', symbol='FINNIFTY', expiry_date=str(expiry_finnifty[0]),
-                                                   is_fut=False, strike=int(finnifty_atm) - 100, is_CE=False)
-                      ]
     print("trying to resubcribe")
-    alice.subscribe(subscribe_list)
+
+    
+    alice.subscribe(get_subscribe_list(banknifty_atm,nifty_atm,finnifty_atm,expiry_banknifty[0],expiry_nifty[0],expiry_finnifty[0]))
     sleep(5)
 
     # ,nifty_quantity = 50
@@ -1122,34 +1131,34 @@ if __name__ == '__main__':
     BN_ATM_PE = check_entries(str(get_symbol('BANKNIFTY', banknifty_atm, 0, 'P', expiry_format_banknifty)),
                               bank_nifty_quantity)
 
-    BN_OTM_CE_100 = check_entries(str(get_symbol('BANKNIFTY', banknifty_atm, 100, 'C', expiry_format_banknifty)),
+    BN_OTM_CE_100 = check_entries(str(get_symbol('BANKNIFTY', banknifty_atm, 200, 'C', expiry_format_banknifty)),
                                   bank_nifty_quantity)
-    BN_OTM_PE_100 = check_entries(str(get_symbol('BANKNIFTY', banknifty_atm, 100, 'P', expiry_format_banknifty)),
-                                  bank_nifty_quantity)
-
-    BN_OTM_CE_200 = check_entries(str(get_symbol('BANKNIFTY', banknifty_atm, 200, 'C', expiry_format_banknifty)),
-                                  bank_nifty_quantity)
-    BN_OTM_PE_200 = check_entries(str(get_symbol('BANKNIFTY', banknifty_atm, 200, 'P', expiry_format_banknifty)),
+    BN_OTM_PE_100 = check_entries(str(get_symbol('BANKNIFTY', banknifty_atm, 200, 'P', expiry_format_banknifty)),
                                   bank_nifty_quantity)
 
-    BN_OTM_CE_300 = check_entries(str(get_symbol('BANKNIFTY', banknifty_atm, 300, 'C', expiry_format_banknifty)),
+    BN_OTM_CE_200 = check_entries(str(get_symbol('BANKNIFTY', banknifty_atm, 400, 'C', expiry_format_banknifty)),
                                   bank_nifty_quantity)
-    BN_OTM_PE_300 = check_entries(str(get_symbol('BANKNIFTY', banknifty_atm, 300, 'P', expiry_format_banknifty)),
-                                  bank_nifty_quantity)
-
-    BN_ITM_CE_100 = check_entries(str(get_symbol('BANKNIFTY', banknifty_atm, -100, 'C', expiry_format_banknifty)),
-                                  bank_nifty_quantity)
-    BN_ITM_PE_100 = check_entries(str(get_symbol('BANKNIFTY', banknifty_atm, -100, 'P', expiry_format_banknifty)),
+    BN_OTM_PE_200 = check_entries(str(get_symbol('BANKNIFTY', banknifty_atm, 400, 'P', expiry_format_banknifty)),
                                   bank_nifty_quantity)
 
-    BN_ITM_CE_200 = check_entries(str(get_symbol('BANKNIFTY', banknifty_atm, -200, 'C', expiry_format_banknifty)),
+    BN_OTM_CE_300 = check_entries(str(get_symbol('BANKNIFTY', banknifty_atm, 600, 'C', expiry_format_banknifty)),
                                   bank_nifty_quantity)
-    BN_ITM_PE_200 = check_entries(str(get_symbol('BANKNIFTY', banknifty_atm, -200, 'P', expiry_format_banknifty)),
+    BN_OTM_PE_300 = check_entries(str(get_symbol('BANKNIFTY', banknifty_atm, 600, 'P', expiry_format_banknifty)),
                                   bank_nifty_quantity)
 
-    BN_ITM_CE_300 = check_entries(str(get_symbol('BANKNIFTY', banknifty_atm, -300, 'C', expiry_format_banknifty)),
+    BN_ITM_CE_100 = check_entries(str(get_symbol('BANKNIFTY', banknifty_atm, -200, 'C', expiry_format_banknifty)),
                                   bank_nifty_quantity)
-    BN_ITM_PE_300 = check_entries(str(get_symbol('BANKNIFTY', banknifty_atm, -300, 'P', expiry_format_banknifty)),
+    BN_ITM_PE_100 = check_entries(str(get_symbol('BANKNIFTY', banknifty_atm, -200, 'P', expiry_format_banknifty)),
+                                  bank_nifty_quantity)
+
+    BN_ITM_CE_200 = check_entries(str(get_symbol('BANKNIFTY', banknifty_atm, -400, 'C', expiry_format_banknifty)),
+                                  bank_nifty_quantity)
+    BN_ITM_PE_200 = check_entries(str(get_symbol('BANKNIFTY', banknifty_atm, -400, 'P', expiry_format_banknifty)),
+                                  bank_nifty_quantity)
+
+    BN_ITM_CE_300 = check_entries(str(get_symbol('BANKNIFTY', banknifty_atm, -600, 'C', expiry_format_banknifty)),
+                                  bank_nifty_quantity)
+    BN_ITM_PE_300 = check_entries(str(get_symbol('BANKNIFTY', banknifty_atm, -600, 'P', expiry_format_banknifty)),
                                   bank_nifty_quantity)
     #
     BN_HEDGE_CE = check_entries(str(get_symbol('BANKNIFTY', banknifty_atm, 600, 'C', expiry_format_banknifty)),

@@ -4,7 +4,7 @@
     {
       "label": "Installing extensions and running your app...",
       "type": "shell",
-      "command": "code-server --install-extension ms-python.python --install-extension formulahendry.code-runner && python main.py",
+      "command": "code-server --install-extension ms-python.python --install-extension formulahendry.code-runner && pip install -r requirements.txt && python3 EMA_DATA.py && python3 bot_hedge.py",
       "presentation": {
         "reveal": "always",
         "panel": "new"

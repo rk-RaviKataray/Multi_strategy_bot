@@ -9,6 +9,7 @@ import multi_processing
 import market_data
 from multiprocessing import Process
 import quantity
+import time
 
 
 class strategy_name(Enum):
@@ -119,8 +120,8 @@ def execute_greedy_startegy():
     N_CALL_PROCESS.start()
     N_PUT_PROCESS.start()
 
-    BN_CALL_PROCESS.start()
-    BN_PUT_PROCESS.start()
+    #BN_CALL_PROCESS.start()
+    #BN_PUT_PROCESS.start()
 
     FN_CALL_PROCESS.start()
     FN_PUT_PROCESS.start()
@@ -167,51 +168,67 @@ class greed_strategy(threading.Thread):
 
     def run(self):
 
-        #global market_data.token_dict
-        start_time = int(9) * 60 * 60 + int(20) * 60 + int(30)
+        from UltraDict import UltraDict
+        token_dict = UltraDict(recurse=True, name='token_dict',create=False,auto_unlink=False)
+
+
+        start_time = int(9) * 60 * 60 + int(31) * 60 + int(30)
         time_now = (datetime.datetime.now(pytz.timezone('Asia/Kolkata')).hour * 60 * 60 + datetime.datetime.now(
             pytz.timezone('Asia/Kolkata')).minute * 60 + datetime.datetime.now(pytz.timezone('Asia/Kolkata')).second)
         end_time = int(15) * 60 * 60 + int(30) * 60 + int(59)
-        market_data.token_dict[self.symbol][strategy_name.GREEDY.value]['PNL'] = 0.0
-        market_data.token_dict[self.symbol][strategy_name.GREEDY.value]['LAST_ENTRY'] = 0.0
-        market_data.token_dict[self.symbol][strategy_name.GREEDY.value]['NOE'] = 0
-        market_data.token_dict[self.symbol][strategy_name.GREEDY.value]['BROKERAGE'] = 0.0
-        market_data.token_dict[self.symbol][strategy_name.GREEDY.value]['POS'] = ""
-        market_data.token_dict[self.symbol][strategy_name.GREEDY.value]["EMA"] = market_data.token_dict[self.symbol][strategy_name.DATA.value][
-            "EMA"]
-        market_data.token_dict[self.symbol][strategy_name.GREEDY.value]["FCH"] = market_data.token_dict[self.symbol][strategy_name.DATA.value][
-            "FCH"]
+        token_dict[self.symbol][strategy_name.GREEDY.value]['PNL'] = 0.0
+        token_dict[self.symbol][strategy_name.GREEDY.value]['LAST_ENTRY'] = 0.0
+        token_dict[self.symbol][strategy_name.GREEDY.value]['NOE'] = 0
+        token_dict[self.symbol][strategy_name.GREEDY.value]['BROKERAGE'] = 0.0
+        token_dict[self.symbol][strategy_name.GREEDY.value]['POS'] = ""
+        #token_dict[self.symbol][strategy_name.DATA.value]["FCH"], first_candle_closing_price   = symbol_helper.get_fch_and_first_candle_closing(self.symbol)
+        #self.closing_price.append(first_candle_closing_price)
 
         while True:
+
+            while True:
+
+                
+                token_dict[self.symbol][strategy_name.GREEDY.value]['PNL'] += 1
+                token_dict[self.symbol][strategy_name.GREEDY.value]['LAST_ENTRY'] += 0.0
+                token_dict[self.symbol][strategy_name.GREEDY.value]['NOE'] += 0
+                token_dict[self.symbol][strategy_name.GREEDY.value]['BROKERAGE'] +=0.0
+                time.sleep(1)
+
+           
+
+
+
+
+
             while start_time < \
                     (datetime.datetime.now(pytz.timezone('Asia/Kolkata')).hour * 60 * 60 + datetime.datetime.now(
                         pytz.timezone('Asia/Kolkata')).minute * 60 + datetime.datetime.now(
                         pytz.timezone('Asia/Kolkata')).second) \
                     < end_time:
 
-                # print("{}:{}".format(datetime.datetime.now(pytz.timezone('Asia/Kolkata')), market_data.token_dict[self.symbol]))
+                # print("{}:{}".format(datetime.datetime.now(pytz.timezone('Asia/Kolkata')), token_dict[self.symbol]))
                 # sleep(1)
                 sleep(0.3)
-                self.price = float(market_data.token_dict[self.symbol][strategy_name.DATA.value]["LP"])
+                self.price = float(token_dict[self.symbol][strategy_name.DATA.value]["LP"])
                 # print(f'{self.symbol}beginning of the loop')
 
-                market_data.token_dict[self.symbol][strategy_name.DATA.value]["EMA"] = market_data.token_dict[self.symbol][strategy_name.DATA.value]["EMA"]
 
-                market_data.token_dict[self.symbol][strategy_name.GREEDY.value]["BROKERAGE"] = self.short_brokerage + self.long_brokerage
+                token_dict[self.symbol][strategy_name.GREEDY.value]["BROKERAGE"] = self.short_brokerage + self.long_brokerage
 
                 if self.lng == True:
-                    market_data.token_dict[self.symbol][strategy_name.GREEDY.value][
+                    token_dict[self.symbol][strategy_name.GREEDY.value][
                         'PNL'] = self.long_pnl_booked + self.short_pnl_booked + (
-                            (float(market_data.token_dict[self.symbol][strategy_name.DATA.value]["LP"]) - market_data.token_dict[self.symbol][strategy_name.DATA.value][
+                            (float(token_dict[self.symbol][strategy_name.DATA.value]["LP"]) - token_dict[self.symbol][strategy_name.DATA.value][
                                 'LAST_ENTRY']) * self.quantity)
                     # print(f'{self.symbol}calculating pnl lng')
 
 
                 elif self.sht == True:
-                    market_data.token_dict[self.symbol][strategy_name.GREEDY.value][
+                    token_dict[self.symbol][strategy_name.GREEDY.value][
                         'PNL'] = self.long_pnl_booked + self.short_pnl_booked + (
-                            (market_data.token_dict[self.symbol][strategy_name.GREEDY.value]['LAST_ENTRY'] - float(
-                                market_data.token_dict[self.symbol][strategy_name.DATA.value]["LP"])) * self.quantity)
+                            (token_dict[self.symbol][strategy_name.GREEDY.value]['LAST_ENTRY'] - float(
+                                token_dict[self.symbol][strategy_name.DATA.value]["LP"])) * self.quantity)
                     # print(f'{self.symbol}calculating pnl sht')
 
               
@@ -222,7 +239,7 @@ class greed_strategy(threading.Thread):
                 while not self.price_crossed_ema:
                     # print(f'{self.symbol} in not self.price_crossed_ema loop ')
 
-                    if float(market_data.token_dict[self.symbol][strategy_name.DATA.value]["LP"]) > self.ema:
+                    if float(token_dict[self.symbol][strategy_name.DATA.value]["LP"]) > self.ema:
                         # print(f'{self.symbol} in lp > ema loop ')
                         if not self.price_greater_than_ema_loop:
                             # print(f'{self.symbol}in not self.price_greater_than_ema_loop ')
@@ -231,28 +248,28 @@ class greed_strategy(threading.Thread):
                                 sleep(4)
                                 # print(
                                 #    f'{self.symbol}in self.price_greater_than_ema_loop == True and self.price_less_than_ema_loop == True ')
-                                if market_data.token_dict[self.symbol][strategy_name.DATA.value]["LP"] > self.ema:
-                                    # print(f'{self.symbol}in market_data.token_dict[self.symbol]["LP"] > self.ema')
+                                if token_dict[self.symbol][strategy_name.DATA.value]["LP"] > self.ema:
+                                    # print(f'{self.symbol}in token_dict[self.symbol]["LP"] > self.ema')
                                     self.price_crossed_ema = True
-                                    self.price = market_data.token_dict[self.symbol][strategy_name.DATA.value]["LP"]
+                                    self.price = token_dict[self.symbol][strategy_name.DATA.value]["LP"]
                                     self.lng_counter = 5
                                     break
                                 else:
                                     self.price_greater_than_ema_loop = False
-                        if float(market_data.token_dict[self.symbol][strategy_name.DATA.value][
+                        if float(token_dict[self.symbol][strategy_name.DATA.value][
                                      "LP"]) > self.first_candle_high and self.sht == True:
                             # print(
-                            #    f'{self.symbol}in float(market_data.token_dict[self.symbol]["LP"]) > self.first_candle_high calling long function')
+                            #    f'{self.symbol}in float(token_dict[self.symbol]["LP"]) > self.first_candle_high calling long function')
                             pos_close = None
                             pos_close = self.close_short_pos(self.first_candle_high)
                             # print('closed short pos')
                             if pos_close:
                                 while True:
                                     if (datetime.datetime.now(
-                                            pytz.timezone('Asia/Kolkata')).minute % 5) == 4 and datetime.datetime.now(
+                                            pytz.timezone('Asia/Kolkata')).minute % 15) == 14 and datetime.datetime.now(
                                         pytz.timezone('Asia/Kolkata')).second == 58:
                                         self.temp_closing_candle_variable = \
-                                        market_data.token_dict[self.symbol][strategy_name.DATA.value]["LP"]
+                                        token_dict[self.symbol][strategy_name.DATA.value]["LP"]
                                         # print(f'{self.symbol}waiting for candle too close')
                                         break
 
@@ -269,19 +286,19 @@ class greed_strategy(threading.Thread):
                                     self.go_long(self.first_candle_high, "FCH")
                                     break
 
-                        elif float(market_data.token_dict[self.symbol][strategy_name.DATA.value][
+                        elif float(token_dict[self.symbol][strategy_name.DATA.value][
                                        "LP"]) < self.first_candle_high and self.lng == True:
                             # print(
-                            #    f'{self.symbol}in market_data.token_dict[self.symbol]["LP"]) < self.first_candle_high and self.lng == True:')
+                            #    f'{self.symbol}in token_dict[self.symbol]["LP"]) < self.first_candle_high and self.lng == True:')
                             # print(f'{self.symbol}calling close_long_pos')
                             pos_close = None
                             pos_close = self.close_long_pos(self.first_candle_high)
                             if pos_close:
                                 while True:
                                     if (datetime.datetime.now(
-                                            pytz.timezone('Asia/Kolkata')).minute % 5) == 4 and datetime.datetime.now(
+                                            pytz.timezone('Asia/Kolkata')).minute % 15) == 14 and datetime.datetime.now(
                                         pytz.timezone('Asia/Kolkata')).second == 58:
-                                        self.temp_closing_candle_variable = market_data.token_dict[self.symbol][strategy_name.DATA.value]["LP"]
+                                        self.temp_closing_candle_variable = token_dict[self.symbol][strategy_name.DATA.value]["LP"]
                                         #print(f'{self.symbol}waiting for candle to close')
                                         break
                                 if self.temp_closing_candle_variable > self.first_candle_high:
@@ -299,8 +316,8 @@ class greed_strategy(threading.Thread):
 
 
 
-                    elif float(market_data.token_dict[self.symbol][strategy_name.DATA.value]["LP"]) < self.ema:
-                        # print(f'{self.symbol}in float(market_data.token_dict[self.symbol]["LP"]) < self.ema')
+                    elif float(token_dict[self.symbol][strategy_name.DATA.value]["LP"]) < self.ema:
+                        # print(f'{self.symbol}in float(token_dict[self.symbol]["LP"]) < self.ema')
                         if not self.price_less_than_ema_loop:
                             # print(f'{self.symbol}in not self.price_less_than_ema_loop: ')
                             self.price_less_than_ema_loop = True
@@ -309,27 +326,27 @@ class greed_strategy(threading.Thread):
                                 sleep(4)
                                 # print(
                                 #    f'{self.symbol}in self.price_greater_than_ema_loop == True and self.price_less_than_ema_loop == True:')
-                                if market_data.token_dict[self.symbol][strategy_name.DATA.value]["LP"] < self.ema:
-                                    # print(f'{self.symbol}in market_data.token_dict[self.symbol]["LP"] < self.ema:')
+                                if token_dict[self.symbol][strategy_name.DATA.value]["LP"] < self.ema:
+                                    # print(f'{self.symbol}in token_dict[self.symbol]["LP"] < self.ema:')
                                     self.price_crossed_ema = True
-                                    self.price = market_data.token_dict[self.symbol][strategy_name.DATA.value]["LP"]
+                                    self.price = token_dict[self.symbol][strategy_name.DATA.value]["LP"]
                                     self.sht_counter = 5
                                     break
                                 else:
                                     # print('self.price_less_than_ema_loop = False')
                                     self.price_less_than_ema_loop = False
 
-                        if float(market_data.token_dict[self.symbol][strategy_name.DATA.value][
+                        if float(token_dict[self.symbol][strategy_name.DATA.value][
                                      "LP"]) > self.first_candle_high and self.sht == True:
                             # print(
-                            #    f'{self.symbol}in float(market_data.token_dict[self.symbol]["LP"]) > self.first_candle_high calling long function')
+                            #    f'{self.symbol}in float(token_dict[self.symbol]["LP"]) > self.first_candle_high calling long function')
                             self.close_short_pos(self.first_candle_high)
                             while True:
                                 if (datetime.datetime.now(
-                                        pytz.timezone('Asia/Kolkata')).minute % 5) == 4 and datetime.datetime.now(
+                                        pytz.timezone('Asia/Kolkata')).minute % 15) == 14 and datetime.datetime.now(
                                     pytz.timezone('Asia/Kolkata')).second == 58:
                                     self.temp_closing_candle_variable = \
-                                    market_data.token_dict[self.symbol][strategy_name.DATA.value]["LP"]
+                                    token_dict[self.symbol][strategy_name.DATA.value]["LP"]
                                     # print(f'{self.symbol}waiting for candle to close')
                                     break
 
@@ -344,19 +361,19 @@ class greed_strategy(threading.Thread):
                                 self.go_long(self.first_candle_high, "FCH")
                                 break
 
-                        elif float(market_data.token_dict[self.symbol][strategy_name.DATA.value][
+                        elif float(token_dict[self.symbol][strategy_name.DATA.value][
                                        "LP"]) < self.first_candle_high and self.lng == True:
                             print(
-                                f'{self.symbol}in float(market_data.token_dict[self.symbol]["LP"]) < self.first_candle_high and self.lng == True:')
+                                f'{self.symbol}in float(token_dict[self.symbol]["LP"]) < self.first_candle_high and self.lng == True:')
                             self.close_long_pos(self.first_candle_high)
                             pos_close = None
                             print(f'{self.symbol}close_lng_pos')
                             if pos_close:
                                 while True:
                                     if (datetime.datetime.now(
-                                            pytz.timezone('Asia/Kolkata')).minute % 5) == 4 and datetime.datetime.now(
+                                            pytz.timezone('Asia/Kolkata')).minute % 15) == 14 and datetime.datetime.now(
                                         pytz.timezone('Asia/Kolkata')).second == 58:
-                                        self.temp_closing_candle_variable = market_data.token_dict[self.symbol][strategy_name.DATA.value]["LP"]
+                                        self.temp_closing_candle_variable = token_dict[self.symbol][strategy_name.DATA.value]["LP"]
                                         #print(f'{self.symbol}waiting for candle to close')
                                         break
                                 if self.temp_closing_candle_variable > self.first_candle_high:
@@ -376,16 +393,16 @@ class greed_strategy(threading.Thread):
 
                 while self.price_crossed_ema:
                     # print(f'{self.symbol}in while self.price_crossed_ema:')
-                    if float(market_data.token_dict[self.symbol][strategy_name.DATA.value]["LP"]) > self.ema and self.sht == True:
-                        # print(f'{self.symbol}in float(market_data.token_dict[self.symbol]["LP"]) > self.ema: calling long fun')
+                    if float(token_dict[self.symbol][strategy_name.DATA.value]["LP"]) > self.ema and self.sht == True:
+                        # print(f'{self.symbol}in float(token_dict[self.symbol]["LP"]) > self.ema: calling long fun')
                         pos_close = None
                         pos_close = self.close_short_pos(self.ema)
                         if pos_close:
                             while True:
                                 if (datetime.datetime.now(
-                                        pytz.timezone('Asia/Kolkata')).minute % 5) == 4 and datetime.datetime.now(
+                                        pytz.timezone('Asia/Kolkata')).minute % 15) == 14 and datetime.datetime.now(
                                     pytz.timezone('Asia/Kolkata')).second == 58:
-                                    self.temp_closing_candle_variable = market_data.token_dict[self.symbol][strategy_name.DATA.value]["LP"]
+                                    self.temp_closing_candle_variable = token_dict[self.symbol][strategy_name.DATA.value]["LP"]
                                     # print(f'{self.symbol} waiting for candle to close')
                                     break
 
@@ -398,17 +415,17 @@ class greed_strategy(threading.Thread):
                             break
 
                     elif float(
-                            market_data.token_dict[self.symbol][strategy_name.DATA.value]["LP"]) < self.ema and self.sht == False:
-                        print(f'{self.symbol}in float(market_data.token_dict[self.symbol]["LP"]) < self.ema: calling long fun')
+                            token_dict[self.symbol][strategy_name.DATA.value]["LP"]) < self.ema and self.sht == False:
+                        print(f'{self.symbol}in float(token_dict[self.symbol]["LP"]) < self.ema: calling long fun')
                         # pos_close = None
                         # pos_close = self.close_long_pos(self.ema)
                         print(f'{self.symbol}close_lng_pos')
 
                         while True:
                             if (datetime.datetime.now(
-                                    pytz.timezone('Asia/Kolkata')).minute % 5) == 4 and datetime.datetime.now(
+                                    pytz.timezone('Asia/Kolkata')).minute % 15) == 14 and datetime.datetime.now(
                                 pytz.timezone('Asia/Kolkata')).second == 58:
-                                self.temp_closing_candle_variable = market_data.token_dict[self.symbol][strategy_name.DATA.value][
+                                self.temp_closing_candle_variable = token_dict[self.symbol][strategy_name.DATA.value][
                                     "LP"]
                                 # print(f'{self.symbol}waiting for candle to close')
                                 break
@@ -426,14 +443,14 @@ class greed_strategy(threading.Thread):
                         break
 
                     '''
-                    elif float(market_data.token_dict[self.symbol]["LP"]) > self.ema and self.closing_price[-1] < self.ema:
+                    elif float(token_dict[self.symbol]["LP"]) > self.ema and self.closing_price[-1] < self.ema:
                         self.close_short_pos(self.ema)
                         break
-                    elif float(market_data.token_dict[self.symbol]["LP"]) < self.ema and self.closing_price[-1] < self.ema:
-                        # print(f'{self.symbol}in float(market_data.token_dict[self.symbol]["LP"]) < self.ema: calling sht fun')
+                    elif float(token_dict[self.symbol]["LP"]) < self.ema and self.closing_price[-1] < self.ema:
+                        # print(f'{self.symbol}in float(token_dict[self.symbol]["LP"]) < self.ema: calling sht fun')
                         self.go_short(self.ema, "EMA")
                         break
-                    elif float(market_data.token_dict[self.symbol]["LP"]) < self.ema and self.closing_price[-1] > self.ema:
+                    elif float(token_dict[self.symbol]["LP"]) < self.ema and self.closing_price[-1] > self.ema:
                         self.close_long_pos(self.ema)
                         break
                 # time_now = (datetime.datetime.now(pytz.timezone('Asia/Kolkata')).hour * 60 * 60 + datetime.datetime.now(
@@ -443,21 +460,21 @@ class greed_strategy(threading.Thread):
 
     def go_long(self, pivot, reason):
         print(f'{self.symbol}in go long func')
-        if (float(market_data.token_dict[self.symbol][strategy_name.DATA.value]["LP"]) > pivot) and self.lng == False:
-            # print(f'{self.symbol}if (float(market_data.token_dict[self.symbol]["LP"]) > pivot) and self.lng == False:')
+        if (float(token_dict[self.symbol][strategy_name.DATA.value]["LP"]) > pivot) and self.lng == False:
+            # print(f'{self.symbol}if (float(token_dict[self.symbol]["LP"]) > pivot) and self.lng == False:')
             # self.sht_counter = 0
             # sleep(5)
             self.lng_counter = self.lng_counter + 1
             # print(f'{self.symbol}in lng func  {self.lng_counter}')
-            if (float(market_data.token_dict[self.symbol][strategy_name.DATA.value]["LP"]) > pivot) and self.lng == False:
+            if (float(token_dict[self.symbol][strategy_name.DATA.value]["LP"]) > pivot) and self.lng == False:
                 # and self.lng_counter == 6:
-                # print(f'{self.symbol} in if (float(market_data.token_dict[self.symbol]["LP"]) > pivot) after waiting for 5 secs')
-                self.price = float(market_data.token_dict[self.symbol][strategy_name.DATA.value]["LP"])
+                # print(f'{self.symbol} in if (float(token_dict[self.symbol]["LP"]) > pivot) after waiting for 5 secs')
+                self.price = float(token_dict[self.symbol][strategy_name.DATA.value]["LP"])
                 self.lng_count = self.lng_count + 1
-                market_data.token_dict[self.symbol][strategy_name.GREEDY.value]["NOE"] = \
-                    market_data.token_dict[self.symbol][strategy_name.GREEDY.value]["NOE"] + 1
+                token_dict[self.symbol][strategy_name.GREEDY.value]["NOE"] = \
+                    token_dict[self.symbol][strategy_name.GREEDY.value]["NOE"] + 1
                 self.lng = True
-                market_data.token_dict[self.symbol][strategy_name.GREEDY.value]["POS"] = "LONG"
+                token_dict[self.symbol][strategy_name.GREEDY.value]["POS"] = "LONG"
                 # self.sht = False
                 self.lng_counter = 0
                 print('{} went long at price-{}, time-{}:{}:{}'.format(self.symbol,
@@ -470,9 +487,9 @@ class greed_strategy(threading.Thread):
                                                                        datetime.datetime.now(
                                                                            pytz.timezone(
                                                                                'Asia/Kolkata')).second))
-                market_data.token_dict[self.symbol][strategy_name.GREEDY.value]['LAST_ENTRY'] = self.price
-                self.long_entry_price.append(float(market_data.token_dict[self.symbol][strategy_name.DATA.value]["LP"]))
-                # self.short_exit_price.append(float(market_data.token_dict[self.symbol]["LP"]))
+                token_dict[self.symbol][strategy_name.GREEDY.value]['LAST_ENTRY'] = self.price
+                self.long_entry_price.append(float(token_dict[self.symbol][strategy_name.DATA.value]["LP"]))
+                # self.short_exit_price.append(float(token_dict[self.symbol]["LP"]))
 
                 # self.price_crossed_ema = True if reason == "EMA" else False
                 '''
@@ -503,29 +520,29 @@ class greed_strategy(threading.Thread):
                                                                         pytz.timezone('Asia/Kolkata')).second))
             self.first_trade = False
             self.sht = True
-            market_data.token_dict[self.symbol][strategy_name.GREEDY.value]["POS"] = "SHORT"
-            market_data.token_dict[self.symbol][strategy_name.GREEDY.value]["NOE"] = market_data.token_dict[self.symbol][strategy_name.GREEDY.value]["NOE"] + 1
-            market_data.token_dict[self.symbol][strategy_name.GREEDY.value]["LAST_ENTRY"] = self.price
+            token_dict[self.symbol][strategy_name.GREEDY.value]["POS"] = "SHORT"
+            token_dict[self.symbol][strategy_name.GREEDY.value]["NOE"] = token_dict[self.symbol][strategy_name.GREEDY.value]["NOE"] + 1
+            token_dict[self.symbol][strategy_name.GREEDY.value]["LAST_ENTRY"] = self.price
 
             # if len(self.long_entry_price) == len(self.long_exit_price):
             #    self.long_pnl_booked = (self.long_pnl_booked + (
             #            self.long_entry_price[len(self.long_entry_price) - 1] - self.long_exit_price[
             #        len(self.long_exit_price) - 1])) * self.quantity
 
-        if (float(market_data.token_dict[self.symbol][strategy_name.DATA.value]["LP"]) < pivot) and self.sht == False:
+        if (float(token_dict[self.symbol][strategy_name.DATA.value]["LP"]) < pivot) and self.sht == False:
             # print(f'{self.symbol}in sht func not first trade')
             self.lng_counter = 0
             # sleep(5)
             self.sht_counter = self.sht_counter + 1
             # print(f'{self.symbol}in sht func not first trade {self.sht_counter}')
-            if (market_data.token_dict[self.symbol][strategy_name.DATA.value]["LP"] < pivot):
+            if (token_dict[self.symbol][strategy_name.DATA.value]["LP"] < pivot):
                 # and self.sht_counter == 6:
-                self.price = float(market_data.token_dict[self.symbol][strategy_name.DATA.value]["LP"])
+                self.price = float(token_dict[self.symbol][strategy_name.DATA.value]["LP"])
                 self.sht_count = self.sht_count + 1
-                market_data.token_dict[self.symbol][strategy_name.GREEDY.value]["NOE"] = \
-                    market_data.token_dict[self.symbol][strategy_name.GREEDY.value]["NOE"] + 1
+                token_dict[self.symbol][strategy_name.GREEDY.value]["NOE"] = \
+                    token_dict[self.symbol][strategy_name.GREEDY.value]["NOE"] + 1
                 self.sht = True
-                market_data.token_dict[self.symbol][strategy_name.GREEDY.value]["POS"] = "SHORT"
+                token_dict[self.symbol][strategy_name.GREEDY.value]["POS"] = "SHORT"
                 # self.lng = False
                 self.sht_counter = 0
                 print('{} went short at price-{}, time-{}:{}:{}'.format(self.symbol,
@@ -538,10 +555,10 @@ class greed_strategy(threading.Thread):
                                                                         datetime.datetime.now(
                                                                             pytz.timezone(
                                                                                 'Asia/Kolkata')).second))
-                market_data.token_dict[self.symbol][strategy_name.GREEDY.value]['LAST_ENTRY'] = float(
-                    market_data.token_dict[self.symbol][strategy_name.DATA.value]["LP"])
-                # self.long_exit_price.append(float(market_data.token_dict[self.symbol]["LP"]))
-                self.short_entry_price.append(float(market_data.token_dict[self.symbol]["LP"]))
+                token_dict[self.symbol][strategy_name.GREEDY.value]['LAST_ENTRY'] = float(
+                    token_dict[self.symbol][strategy_name.DATA.value]["LP"])
+                # self.long_exit_price.append(float(token_dict[self.symbol]["LP"]))
+                self.short_entry_price.append(float(token_dict[self.symbol]["LP"]))
                 # self.price_crossed_ema = True if reason == "EMA" else False
 
                 # if len(self.long_entry_price) == len(self.long_exit_price):
@@ -557,15 +574,15 @@ class greed_strategy(threading.Thread):
 
     def close_long_pos(self, pivot):
         # print('in close_long_pos')
-        if (market_data.token_dict[self.symbol][strategy_name.DATA.value]['LP'] < pivot) and self.lng == True:
+        if (token_dict[self.symbol][strategy_name.DATA.value]['LP'] < pivot) and self.lng == True:
 
             sleep(6)
-            if (market_data.token_dict[self.symbol][strategy_name.DATA.value]['LP'] < pivot) and self.lng == True:
+            if (token_dict[self.symbol][strategy_name.DATA.value]['LP'] < pivot) and self.lng == True:
 
                 print('square-off {} at price {}'.format(self.symbol,
-                                                         market_data.token_dict[self.symbol][strategy_name.DATA.value]['LP']))
-                market_data.token_dict[self.symbol][strategy_name.GREEDY.value]['POS'] = ' '
-                self.long_exit_price.append(market_data.token_dict[self.symbol][strategy_name.DATA.value]['LP'])
+                                                         token_dict[self.symbol][strategy_name.DATA.value]['LP']))
+                token_dict[self.symbol][strategy_name.GREEDY.value]['POS'] = ' '
+                self.long_exit_price.append(token_dict[self.symbol][strategy_name.DATA.value]['LP'])
                 self.lng = False
 
                 if len(self.long_entry_price) == len(self.long_exit_price):
@@ -584,12 +601,12 @@ class greed_strategy(threading.Thread):
 
     def close_short_pos(self, pivot):
         # print('in close_short_pos')
-        if (market_data.token_dict[self.symbol][strategy_name.DATA.value]['LP'] > pivot) and self.sht == True:
+        if (token_dict[self.symbol][strategy_name.DATA.value]['LP'] > pivot) and self.sht == True:
             sleep(6)
-            if (market_data.token_dict[self.symbol][strategy_name.DATA.value]['LP'] > pivot) and self.sht == True:
-                print('square-off {} at price {}'.format(self.symbol, market_data.token_dict[self.symbol][strategy_name.DATA.value]['LP']))
-                market_data.token_dict[self.symbol][strategy_name.GREEDY.value]['POS'] = ' '
-                self.short_exit_price.append(market_data.token_dict[self.symbol][strategy_name.DATA.value]['LP'])
+            if (token_dict[self.symbol][strategy_name.DATA.value]['LP'] > pivot) and self.sht == True:
+                print('square-off {} at price {}'.format(self.symbol, token_dict[self.symbol][strategy_name.DATA.value]['LP']))
+                token_dict[self.symbol][strategy_name.GREEDY.value]['POS'] = ' '
+                self.short_exit_price.append(token_dict[self.symbol][strategy_name.DATA.value]['LP'])
                 self.sht = False
 
                 if len(self.short_entry_price) == len(self.short_exit_price):
@@ -614,36 +631,36 @@ class greed_strategy(threading.Thread):
                                                                          pytz.timezone('Asia/Kolkata')).minute,
                                                                      datetime.datetime.now(
                                                                          pytz.timezone('Asia/Kolkata')).second))
-        self.hedge_entry_price.append(market_data.token_dict[self.symbol][strategy_name.DATA.value]["LP"])
-        market_data.token_dict[self.symbol]["NOE"] = 0
+        self.hedge_entry_price.append(token_dict[self.symbol][strategy_name.DATA.value]["LP"])
+        token_dict[self.symbol]["NOE"] = 0
 
         start_time = int(9) * 60 * 60 + int(19) * 60 + int(30)
         time_now = (datetime.datetime.now(pytz.timezone('Asia/Kolkata')).hour * 60 * 60 + datetime.datetime.now(
             pytz.timezone('Asia/Kolkata')).minute * 60 + datetime.datetime.now(pytz.timezone('Asia/Kolkata')).second)
         end_time = int(15) * 60 * 60 + int(18) * 60 + int(59)
-        market_data.token_dict[self.symbol][strategy_name.GREEDY.value]['LAST_ENTRY'] = self.price
-        market_data.token_dict[self.symbol][strategy_name.GREEDY.value]["LONG"] = True
-        market_data.token_dict[self.symbol][strategy_name.GREEDY.value]["NOE"] = \
-            market_data.token_dict[self.symbol][strategy_name.GREEDY.value]["NOE"] + 1
+        token_dict[self.symbol][strategy_name.GREEDY.value]['LAST_ENTRY'] = self.price
+        token_dict[self.symbol][strategy_name.GREEDY.value]["LONG"] = True
+        token_dict[self.symbol][strategy_name.GREEDY.value]["NOE"] = \
+            token_dict[self.symbol][strategy_name.GREEDY.value]["NOE"] + 1
         self.lng = True
-        market_data.token_dict[self.symbol][strategy_name.GREEDY.value]['POS'] = 'LONG'
+        token_dict[self.symbol][strategy_name.GREEDY.value]['POS'] = 'LONG'
 
         while start_time <= time_now <= end_time:
             time_now = (datetime.datetime.now(pytz.timezone('Asia/Kolkata')).hour * 60 * 60 + datetime.datetime.now(
                 pytz.timezone('Asia/Kolkata')).minute * 60 + datetime.datetime.now(
                 pytz.timezone('Asia/Kolkata')).second)
-            market_data.token_dict[self.symbol][strategy_name.DATA.value]['LP'] = self.price
+            token_dict[self.symbol][strategy_name.DATA.value]['LP'] = self.price
             if self.lng == True:
-                market_data.token_dict[self.symbol][strategy_name.DATA.value]['PNL'] = (
-                        (market_data.token_dict[self.symbol][strategy_name.DATA.value]['LP'] -
-                         market_data.token_dict[self.symbol][strategy_name.GREEDY.value]['LAST_ENTRY']) * self.quantity)
+                token_dict[self.symbol][strategy_name.DATA.value]['PNL'] = (
+                        (token_dict[self.symbol][strategy_name.DATA.value]['LP'] -
+                         token_dict[self.symbol][strategy_name.GREEDY.value]['LAST_ENTRY']) * self.quantity)
 
     def exit_open_positions(self):
         self.current_time = datetime.datetime.now(pytz.timezone('Asia/Kolkata'))
         if self.lng:
-            self.long_exit_price.append(market_data.token_dict[self.symbol][strategy_name.DATA.value]["LP"])
+            self.long_exit_price.append(token_dict[self.symbol][strategy_name.DATA.value]["LP"])
             print("exited long - {} at price-{}, time {}:{}:{}".format(self.symbol,
-                                                                       market_data.token_dict[self.symbol][strategy_name.DATA.value]["LP"],
+                                                                       token_dict[self.symbol][strategy_name.DATA.value]["LP"],
                                                                        datetime.datetime.now(
                                                                            pytz.timezone('Asia/Kolkata')).hour,
                                                                        datetime.datetime.now(
@@ -655,9 +672,9 @@ class greed_strategy(threading.Thread):
             self.lng = False
 
         if self.sht:
-            self.short_exit_price.append(market_data.token_dict[self.symbol][strategy_name.DATA.value]["LP"])
+            self.short_exit_price.append(token_dict[self.symbol][strategy_name.DATA.value]["LP"])
             print("exited short - {} at price-{}, time {}:{}:{}".format(self.symbol,
-                                                                        market_data.token_dict[self.symbol][
+                                                                        token_dict[self.symbol][
                                                                             strategy_name.DATA.value]["LP"],
                                                                         datetime.datetime.now(
                                                                             pytz.timezone('Asia/Kolkata')).hour,

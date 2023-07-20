@@ -24,23 +24,24 @@ def socket(alice):
 
 
     LTP = 0
-    token_dict = UltraDict(recurse=True)
+    from UltraDict import UltraDict
+    token_dict = UltraDict(recurse=True, name='token_dict',create=True,auto_unlink=False) 
 
 
     token_dict['NIFTY_SPOT'] = [
     {"TOKEN": 0, "LP": 0.0,"EMA": 0, "FCH": 0},
     {"POS": "", "PNL": 0.0, "LAST_ENTRY": 0, "NOE": 0,"BROKERAGE": 0},
-    {"POS": "", "PNL": 0.0, "LAST_ENTRY": 0, "EMA": 0, "FCH": 0, "NOE": 0,"BROKERAGE": 0}
+    {"POS": "", "PNL": 0.0, "LAST_ENTRY": 0,  "NOE": 0,"BROKERAGE": 0}
     ]
     token_dict['BANKNIFTY_SPOT'] = [
     {"TOKEN": 0, "LP": 0.0, "EMA": 0, "FCH": 0},
     {"POS": "", "PNL": 0.0, "LAST_ENTRY": 0, "NOE": 0, "BROKERAGE": 0},
-    {"POS": "", "PNL": 0.0, "LAST_ENTRY": 0, "EMA": 0, "FCH": 0, "NOE": 0, "BROKERAGE": 0}
+    {"POS": "", "PNL": 0.0, "LAST_ENTRY": 0, "NOE": 0, "BROKERAGE": 0}
     ]
     token_dict['FINNIFTY_SPOT'] = [
     {"TOKEN": 0, "LP": 0.0, "EMA": 0, "FCH": 0},
     {"POS": "", "PNL": 0.0, "LAST_ENTRY": 0, "NOE": 0, "BROKERAGE": 0},
-    {"POS": "", "PNL": 0.0, "LAST_ENTRY": 0, "EMA": 0, "FCH": 0, "NOE": 0, "BROKERAGE": 0}
+    {"POS": "", "PNL": 0.0, "LAST_ENTRY": 0, "NOE": 0, "BROKERAGE": 0}
     ]
 
  
@@ -138,7 +139,11 @@ def get_atm():
     global nifty_atm
     global banknifty_atm
     global finnifty_atm
+
+
     while True:
+
+        #change timeo
         if datetime.datetime.now(pytz.timezone('Asia/Kolkata')).hour >= 0 \
                 and datetime.datetime.now(pytz.timezone('Asia/Kolkata')).minute >= 00 \
                 and datetime.datetime.now(pytz.timezone('Asia/Kolkata')).second >= 00:
@@ -146,9 +151,9 @@ def get_atm():
             #banknifty_atm = int(round(float(token_dict['BANKNIFTY_SPOT'][strategy_name.DATA.value]["LP"]), -2))
             #finnifty_atm = int(round(float(token_dict['FINNIFTY_SPOT'][strategy_name.DATA.value]["LP"]), -2))
 
-            nifty_atm = 18600
-            banknifty_atm = 43000
-            finnifty_atm = 19300
+            nifty_atm = 19500
+            banknifty_atm = 44900
+            finnifty_atm = 20100
         
 
 
@@ -165,5 +170,8 @@ def get_banknifty_atm():
 
 def get_finnifty_atm():
     return finnifty_atm
+
+def get_token_dict():
+    return token_dict
 
 #

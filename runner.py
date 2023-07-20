@@ -13,8 +13,10 @@ import expiry_data
 import greedy_strategy
 import market_data
 import normal_strategy
+import time
 
 app = Flask(__name__)
+
 
 # logging.basicConfig(level=logging.DEBUG, filename="log.log", filemode="w")
 
@@ -199,10 +201,13 @@ def greedy():
     global BANKNIFTY_NET_PNL_LIST_FOR_GRAPH
     global TIME_STAMP_FOR_GRAPH
 
+    token_dict = UltraDict(recurse=True, name='token_dict',create=False,auto_unlink=False)
+
+
     # json2html.convert(json=input)
     updated_html = ""
 
-    for x in market_data.token_dict.keys():
+    for x in token_dict.keys():
 
         updated_html = updated_html + """
         <tr>
@@ -216,26 +221,26 @@ def greedy():
             <td>  {fch}   </td>
             <td>  {noe}   </td>
         </tr>
-        """.format(instrument=x, lp=round(market_data.token_dict[x][strategy_name.DATA.value]["LP"], 2),
-                   pos=market_data.token_dict[x][strategy_name.GREEDY.value]["POS"],
-                   pnl=round(market_data.token_dict[x][strategy_name.GREEDY.value]["PNL"], 2), brokerage=round(market_data.token_dict[x][strategy_name.GREEDY.value]["BROKERAGE"], 2),
-                   last_entry=round(market_data.token_dict[x][strategy_name.GREEDY.value]["LAST_ENTRY"], 2), ema=round(market_data.token_dict[x][strategy_name.DATA.value]["EMA"], 2),
-                   fch=round(market_data.token_dict[x][strategy_name.DATA.value]["FCH"], 2), noe=int(market_data.token_dict[x][strategy_name.GREEDY.value]["NOE"]))
+        """.format(instrument=x, lp=round(token_dict[x][strategy_name.DATA.value]["LP"], 2),
+                   pos=token_dict[x][strategy_name.GREEDY.value]["POS"],
+                   pnl=round(token_dict[x][strategy_name.GREEDY.value]["PNL"], 2), brokerage=round(token_dict[x][strategy_name.GREEDY.value]["BROKERAGE"], 2),
+                   last_entry=round(token_dict[x][strategy_name.GREEDY.value]["LAST_ENTRY"], 2), ema=round(token_dict[x][strategy_name.DATA.value]["EMA"], 2),
+                   fch=round(token_dict[x][strategy_name.DATA.value]["FCH"], 2), noe=int(token_dict[x][strategy_name.GREEDY.value]["NOE"]))
 
         if x[0] == "N":
-            NIFTY_TOTAL_PNL_list.append(market_data.token_dict[x][strategy_name.GREEDY.value]["PNL"])
-            NIFTY_TOTAL_BROKERAGE_list.append(market_data.token_dict[x][strategy_name.GREEDY.value]["BROKERAGE"])
-            NIFTY_TOTAL_ENTRIES_list.append(market_data.token_dict[x][strategy_name.GREEDY.value]["NOE"])
+            NIFTY_TOTAL_PNL_list.append(token_dict[x][strategy_name.GREEDY.value]["PNL"])
+            NIFTY_TOTAL_BROKERAGE_list.append(token_dict[x][strategy_name.GREEDY.value]["BROKERAGE"])
+            NIFTY_TOTAL_ENTRIES_list.append(token_dict[x][strategy_name.GREEDY.value]["NOE"])
 
         elif x[0] == "B":
-            BANKNIFTY_TOTAL_PNL_list.append(market_data.token_dict[x][strategy_name.GREEDY.value]["PNL"])
-            BANKNIFTY_TOTAL_BROKERAGE_list.append(market_data.token_dict[x][strategy_name.GREEDY.value]["BROKERAGE"])
-            BANKNIFTY_TOTAL_ENTRIES_list.append(market_data.token_dict[x][strategy_name.GREEDY.value]["NOE"])
+            BANKNIFTY_TOTAL_PNL_list.append(token_dict[x][strategy_name.GREEDY.value]["PNL"])
+            BANKNIFTY_TOTAL_BROKERAGE_list.append(token_dict[x][strategy_name.GREEDY.value]["BROKERAGE"])
+            BANKNIFTY_TOTAL_ENTRIES_list.append(token_dict[x][strategy_name.GREEDY.value]["NOE"])
 
         elif x[0] == "F":
-            FINNIFTY_TOTAL_PNL_list.append(market_data.token_dict[x][strategy_name.GREEDY.value]["PNL"])
-            FINNIFTY_TOTAL_BROKERAGE_list.append(market_data.token_dict[x][strategy_name.GREEDY.value]["BROKERAGE"])
-            FINNIFTY_TOTAL_ENTRIES_list.append(market_data.token_dict[x][strategy_name.GREEDY.value]["NOE"])
+            FINNIFTY_TOTAL_PNL_list.append(token_dict[x][strategy_name.GREEDY.value]["PNL"])
+            FINNIFTY_TOTAL_BROKERAGE_list.append(token_dict[x][strategy_name.GREEDY.value]["BROKERAGE"])
+            FINNIFTY_TOTAL_ENTRIES_list.append(token_dict[x][strategy_name.GREEDY.value]["NOE"])
 
     NIFTY_TOTAL_PNL = round(sum(NIFTY_TOTAL_PNL_list), 2)
     NIFTY_NET_PNL = round((sum(NIFTY_TOTAL_PNL_list) - sum(NIFTY_TOTAL_BROKERAGE_list)), 2)
@@ -345,10 +350,14 @@ def normal():
     global BANKNIFTY_NET_PNL_LIST_FOR_GRAPH
     global TIME_STAMP_FOR_GRAPH
 
+    token_dict = UltraDict(recurse=True, name='token_dict',create=False,auto_unlink=False)
+
+
+
     # json2html.convert(json=input)
     updated_html = ""
 
-    for x in market_data.token_dict.keys():
+    for x in token_dict.keys():
 
         updated_html = updated_html + """
         <tr>
@@ -362,26 +371,26 @@ def normal():
             <td>  {fch}   </td>
             <td>  {noe}   </td>
         </tr>
-        """.format(instrument=x, lp=round(market_data.token_dict[x][strategy_name.DATA.value]["LP"], 2),
-                   pos=market_data.token_dict[x][strategy_name.NORMAL.value]["POS"],
-                   pnl=round(market_data.token_dict[x][strategy_name.NORMAL.value]["PNL"], 2), brokerage=round(market_data.token_dict[x][strategy_name.NORMAL.value]["BROKERAGE"], 2),
-                   last_entry=round(market_data.token_dict[x][strategy_name.NORMAL.value]["LAST_ENTRY"], 2), ema=round(market_data.token_dict[x][strategy_name.DATA.value]["EMA"], 2),
-                   fch=round(market_data.token_dict[x][strategy_name.DATA.value]["FCH"], 2), noe=int(market_data.token_dict[x][strategy_name.NORMAL.value]["NOE"]))
+        """.format(instrument=x, lp=round(token_dict[x][strategy_name.DATA.value]["LP"], 2),
+                   pos=token_dict[x][strategy_name.NORMAL.value]["POS"],
+                   pnl=round(token_dict[x][strategy_name.NORMAL.value]["PNL"], 2), brokerage=round(token_dict[x][strategy_name.NORMAL.value]["BROKERAGE"], 2),
+                   last_entry=round(token_dict[x][strategy_name.NORMAL.value]["LAST_ENTRY"], 2), ema=round(token_dict[x][strategy_name.DATA.value]["EMA"], 2),
+                   fch=round(token_dict[x][strategy_name.DATA.value]["FCH"], 2), noe=int(token_dict[x][strategy_name.NORMAL.value]["NOE"]))
 
         if x[0] == "N":
-            NIFTY_TOTAL_PNL_list.append(market_data.token_dict[x][strategy_name.NORMAL.value]["PNL"])
-            NIFTY_TOTAL_BROKERAGE_list.append(market_data.token_dict[x][strategy_name.NORMAL.value]["BROKERAGE"])
-            NIFTY_TOTAL_ENTRIES_list.append(market_data.token_dict[x][strategy_name.NORMAL.value]["NOE"])
+            NIFTY_TOTAL_PNL_list.append(token_dict[x][strategy_name.NORMAL.value]["PNL"])
+            NIFTY_TOTAL_BROKERAGE_list.append(token_dict[x][strategy_name.NORMAL.value]["BROKERAGE"])
+            NIFTY_TOTAL_ENTRIES_list.append(token_dict[x][strategy_name.NORMAL.value]["NOE"])
 
         elif x[0] == "B":
-            BANKNIFTY_TOTAL_PNL_list.append(market_data.token_dict[x][strategy_name.NORMAL.value]["PNL"])
-            BANKNIFTY_TOTAL_BROKERAGE_list.append(market_data.token_dict[x][strategy_name.NORMAL.value]["BROKERAGE"])
-            BANKNIFTY_TOTAL_ENTRIES_list.append(market_data.token_dict[x][strategy_name.NORMAL.value]["NOE"])
+            BANKNIFTY_TOTAL_PNL_list.append(token_dict[x][strategy_name.NORMAL.value]["PNL"])
+            BANKNIFTY_TOTAL_BROKERAGE_list.append(token_dict[x][strategy_name.NORMAL.value]["BROKERAGE"])
+            BANKNIFTY_TOTAL_ENTRIES_list.append(token_dict[x][strategy_name.NORMAL.value]["NOE"])
 
         elif x[0] == "F":
-            FINNIFTY_TOTAL_PNL_list.append(market_data.token_dict[x][strategy_name.NORMAL.value]["PNL"])
-            FINNIFTY_TOTAL_BROKERAGE_list.append(market_data.token_dict[x][strategy_name.NORMAL.value]["BROKERAGE"])
-            FINNIFTY_TOTAL_ENTRIES_list.append(market_data.token_dict[x][strategy_name.NORMAL.value]["NOE"])
+            FINNIFTY_TOTAL_PNL_list.append(token_dict[x][strategy_name.NORMAL.value]["PNL"])
+            FINNIFTY_TOTAL_BROKERAGE_list.append(token_dict[x][strategy_name.NORMAL.value]["BROKERAGE"])
+            FINNIFTY_TOTAL_ENTRIES_list.append(token_dict[x][strategy_name.NORMAL.value]["NOE"])
 
     NIFTY_TOTAL_PNL = round(sum(NIFTY_TOTAL_PNL_list), 2)
     NIFTY_NET_PNL = round((sum(NIFTY_TOTAL_PNL_list) - sum(NIFTY_TOTAL_BROKERAGE_list)), 2)
@@ -430,7 +439,7 @@ def normal():
                     <td>  <strong> POS  </strong>  </td>
                     <td>  <strong> PNL  </strong>  </td>
                     <td>  <strong> BROKERAGE  </strong>  </td>
-                    <td>  <strong> LAST_ENTRY </strong>   </td>
+                    <td>  <strong> LAST_ENTRY </strong>   </td>i
                     <td>  <strong> EMA </strong>   </td>
                     <td>  <strong> FCH </strong>   </td>
                     <td>  <strong> NOE  </strong>  </td>
@@ -462,7 +471,7 @@ def normal():
         </table>
         """.format(updated_html2)
 
-    html = {"individual_html": html1, "summary_html": html2}
+    html = {"individual_html": html1, "summary_html": html2,'token_dict':[1,2,3,4,5]}
 
     # NIFTY_GROSS_PNL_LIST_FOR_GRAPH.append(NIFTY_TOTAL_PNL)
     # NIFTY_NET_PNL_LIST_FOR_GRAPH.append(NIFTY_NET_PNL)
@@ -483,4 +492,9 @@ def greedy_frontend():
 
 if __name__ == '__main__':
     # app.run()
+    time.sleep(4)
+       
+    #print(token_dict)
+    #time.sleep(4)
     app.run(host='0.0.0.0',port=5000)
+

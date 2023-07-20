@@ -1,4 +1,8 @@
-import datetime
-import pytz
+from UltraDict import UltraDict
 
-print("Initial Subscribe for Index at :", datetime.datetime.now(pytz.timezone('Asia/Kolkata')))
+
+ultra = UltraDict(recurse = True, name='ravi_',create=False,auto_unlink=False)
+#ultra['nested'] = { 'counter': 0 }
+
+
+print(ultra)
