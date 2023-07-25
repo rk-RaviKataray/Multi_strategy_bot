@@ -13,8 +13,8 @@ from retrying import retry
 @retry(stop_max_attempt_number=3, wait_fixed=5000)
 def gen_data():
     # User Credential
-    user_id = '771791'
-    api_key = 'jOf1uqDV2objI4Obj33QuoTN4Iz7qXD0mW5X0WgupaH8k9NvWV0hqifsdN6Rf1vmEmGEbHJsLq448Kkt6tU7u5qocJyOTQOYJAxxcq1dyqHzs1br5IGFnpsQrPUATctt'
+    user_id = ''
+    api_key = ''
     year_dict = {'JAN': '01', 'FEB': '02', 'MAR': '03', 'APR': '04', 'MAY': '05', 'JUN': '06', 'JUL': '07', 'AUG': '08',
                 'SEP': '09', 'OCT': '10', 'NOV': '11', 'DEC': '12'}
 
