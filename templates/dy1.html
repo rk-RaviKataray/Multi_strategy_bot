@@ -29,6 +29,14 @@ var intervalID = setInterval(update_values,1000);
     <span id="summary">?</span>
     <h4><center>INDIVIDUAL INSTRUMENT DATA</center></h4>
     <span id="result">?</span>
+    <div id="popup"  style="display: none;">
+      <div id="popup-content"></div>
+      <div class="chart_name" id="chart_name">
+        <h4 ></h4>
+       </div>
+    <button onclick="hidePopup()">Close</button>
+    </div>
+
 
 <script>
 document.getElementById("summary").innerHTML;

@@ -1,0 +1,28 @@
+#popup {
+    position: fixed;
+    top: 50%;
+    left: 35%;
+    transform: translate(-50%, -50%);
+    width: 300px;
+    background-color: #fff;
+    
+    padding: 10px;
+    z-index: 9999;
+  }
+  
+  #popup button {
+    display: block;
+    margin-top: 10px;
+  }
+
+  /* Styles for attribution message */
+.chart_name {
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    z-index: 3; /* place above the charts */
+    padding: 5px 0px 0px 12px;
+    font-family: "Roboto", sans-serif;
+    font-size: 1.5em;
+    
+}

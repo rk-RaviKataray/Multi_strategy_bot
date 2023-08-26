@@ -1,0 +1,15 @@
+2023-07-28 13:18:35,000 - NIFTY03AUG23P19500 went short at price-53.45, time-13:18:35
+2023-07-28 13:18:35,001 - short entry dict: [0.0, 53.45]
+2023-07-28 13:29:59,179 - NIFTY03AUG23P19500 candle closing price at time 2023-07-28 13:29:59.179664+05:30 is 54.3
+2023-07-28 13:40:26,688 - short entry dict: [0.0, 53.45]
+2023-07-28 13:40:26,694 - short exit dict: [0.0, 58.1]
+2023-07-28 13:40:26,699 - last entry was at : 53.45 and exit at: 58.1
+2023-07-28 13:40:26,704 - short pnl booked until now:-2324.999999999999
+2023-07-28 13:44:59,207 - NIFTY03AUG23P19500 candle closing price at time 2023-07-28 13:44:59.207504+05:30 is 60.1
+2023-07-28 13:59:59,110 - NIFTY03AUG23P19500 candle closing price at time 2023-07-28 13:59:59.110570+05:30 is 54.85
+2023-07-28 14:14:59,152 - NIFTY03AUG23P19500 candle closing price at time 2023-07-28 14:14:59.152447+05:30 is 50.25
+2023-07-28 14:29:59,290 - NIFTY03AUG23P19500 candle closing price at time 2023-07-28 14:29:59.290588+05:30 is 45.65
+2023-07-28 14:44:59,236 - NIFTY03AUG23P19500 candle closing price at time 2023-07-28 14:44:59.236457+05:30 is 49.6
+2023-07-28 14:59:58,006 - NIFTY03AUG23P19500 went short at price-41.0, time-14:59:58
+2023-07-28 14:59:58,007 - short entry dict: [0.0, 53.45, 41.0]
+2023-07-28 15:14:59,043 - NIFTY03AUG23P19500 candle closing price at time 2023-07-28 15:14:59.043188+05:30 is 34.2

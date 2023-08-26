@@ -1,6 +1,6 @@
 from flask import Flask, jsonify, render_template, request
 import webbrowser
-import time
+import time as t
 import threading
 from pya3 import *
 import pandas as pd
@@ -8,15 +8,15 @@ import datetime
 import pytz
 import json
 import os
-import logging
 import pathlib
 from multiprocessing import Process
 from UltraDict import UltraDict
 import retrying
 
+
+
 app = Flask(__name__)
 
-# logging.basicConfig(level=logging.DEBUG, filename="log.log", filemode="w")
 
 # User Credential
 user_id = '771791'
@@ -33,7 +33,7 @@ print("master contract downloaded")
 sleep(1.5)
 
 LTP = 0
-token_dict = UltraDict(recurse=True)
+token_dict = UltraDict(recurse=True,create=True)
 
 '''
 token_dict = {
@@ -164,8 +164,8 @@ def socket():
                     token_dict[x]["LP"] = float(Feed['lp']) if 'lp' in feed_message else token_dict[x]["LP"]
             # LTP = feed_message['lp'] if 'lp' in feed_message else LTP  # If LTP in the response it will store in LTP variable
             # print(type(feed_message["tk"]))
-            if feed_message["tk"] == '243769':
-                print(feed_message)
+            #if feed_message["tk"] == '243769':
+            #    print(feed_message)
 
     # Socket Connection Request
     alice.start_websocket(socket_open_callback=socket_open, socket_close_callback=socket_close,
@@ -232,193 +232,302 @@ class check_entries(threading.Thread):
         self.price_less_than_ema_loop = False
         self.temp_closing_candle_variable = 0
         self.is_hedge = is_hedge
+        self.pnl_list_for_dynamic_graph = []
+
+        self.logger = logging.getLogger(self.symbol)
+        self.logger.setLevel(logging.DEBUG)
+        formatter = logging.Formatter("%(asctime)s - %(message)s")
+
+        if not os.path.exists(f'instrument_data/{self.symbol}'):
+            # Create the folder
+            os.makedirs(f'instrument_data/{self.symbol}')
+
+        # Create a console handler and add it to the logger
+        log_file = os.path.join(f'./instrument_data/{self.symbol}', f"{self.symbol}.log")
+        ch = logging.FileHandler(filename=log_file)
+        ch.setFormatter(formatter)
+        self.logger.addHandler(ch)
+
         try:
             self.closing_price = ema_data[self.symbol]
         except:
              print("{} instrument is anhedge so ema is not required".format(self.symbol))
 
+        
+
     def run(self):
 
-        global token_dict
-        start_time = int(9) * 60 * 60 + int(29) * 60 + int(58)
-        time_now = (datetime.datetime.now(pytz.timezone('Asia/Kolkata')).hour * 60 * 60 + datetime.datetime.now(
-            pytz.timezone('Asia/Kolkata')).minute * 60 + datetime.datetime.now(pytz.timezone('Asia/Kolkata')).second)
-        end_time = int(15) * 60 * 60 + int(20) * 60 + int(59)
-        token_dict[self.symbol]['PNL'] = 0.0
-        token_dict[self.symbol]['LAST_ENTRY'] = 0.0
-        token_dict[self.symbol]['NOE'] = 0
-        token_dict[self.symbol]['BROKERAGE'] = 0.0
-        token_dict[self.symbol]['POS'] = ""
-        token_dict[self.symbol]["EMA"] = 0.0
-        token_dict[self.symbol]["FCH"] = 0.0
+        with open(f"./instrument_data/{self.symbol}/candle_data.jsonl", 'a') as self.candle_data_file:
 
-        if self.is_hedge:
-            self.hedge()
+            global token_dict
+            start_time = int(9) * 60 * 60 + int(29) * 60 + int(58)
+            time_now = (datetime.datetime.now(pytz.timezone('Asia/Kolkata')).hour * 60 * 60 + datetime.datetime.now(
+                pytz.timezone('Asia/Kolkata')).minute * 60 + datetime.datetime.now(pytz.timezone('Asia/Kolkata')).second)
+            end_time = int(15) * 60 * 60 + int(20) * 60 + int(59)
+            token_dict[self.symbol]['PNL'] = 0.0
+            token_dict[self.symbol]['LAST_ENTRY'] = 0.0
+            token_dict[self.symbol]['NOE'] = 0
+            token_dict[self.symbol]['BROKERAGE'] = 0.0
+            token_dict[self.symbol]['POS'] = ""
+            token_dict[self.symbol]["EMA"] = 0.0
+            token_dict[self.symbol]["FCH"] = 0.0
 
-        strike = int(self.symbol[-5:])
+            if self.is_hedge:
+                self.hedge()
 
-        if self.symbol[0] == "B":
-            symbol_ = 'BANKNIFTY'
-            expiry_date_ = str(expiry_banknifty[0])
-        elif self.symbol[0] == "N":
-            symbol_ = 'NIFTY'
-            expiry_date_ = str(expiry_nifty[0])
-        elif self.symbol[0] == "F":
-            symbol_ = 'FINNIFTY'
-            expiry_date_ = str(expiry_finnifty[0])
+            strike = int(self.symbol[-5:])
 
-        is_CE = True if self.symbol[-6] == "C" else False
+            if self.symbol[0] == "B":
+                symbol_ = 'BANKNIFTY'
+                expiry_date_ = str(expiry_banknifty[0])
+            elif self.symbol[0] == "N":
+                symbol_ = 'NIFTY'
+                expiry_date_ = str(expiry_nifty[0])
+            elif self.symbol[0] == "F":
+                symbol_ = 'FINNIFTY'
+                expiry_date_ = str(expiry_finnifty[0])
 
-        instrument = alice.get_instrument_for_fno(exch='NFO', symbol=symbol_, expiry_date=expiry_date_,
-                                                  is_fut=False, strike=strike,
-                                                  is_CE=is_CE)
+            is_CE = True if self.symbol[-6] == "C" else False
 
-        from_datetime = datetime.datetime.now(pytz.timezone('Asia/Kolkata')).replace(hour=9,
-                                                                                     minute=14)
-        to_datetime = datetime.datetime.now(pytz.timezone('Asia/Kolkata'))
+            instrument = alice.get_instrument_for_fno(exch='NFO', symbol=symbol_, expiry_date=expiry_date_,
+                                                    is_fut=False, strike=strike,
+                                                    is_CE=is_CE)
 
-        interval = "1"  # ["1", "D"]
-        indices = False  # For Getting index data
-        df_ = alice.get_historical(instrument, from_datetime, to_datetime, interval, indices)
-        self.first_candle_high = max(df_.head(15)['high'])
-        token_dict[self.symbol]["FCH"] = self.first_candle_high
-        self.closing_price.append(df_['close'][14])
-        while True:
-            while start_time < \
-                    (datetime.datetime.now(pytz.timezone('Asia/Kolkata')).hour * 60 * 60 + datetime.datetime.now(
-                        pytz.timezone('Asia/Kolkata')).minute * 60 + datetime.datetime.now(
-                        pytz.timezone('Asia/Kolkata')).second) \
-                    < end_time:
+            from_datetime = datetime.datetime.now(pytz.timezone('Asia/Kolkata')).replace(hour=9,
+                                                                                        minute=14)
+            to_datetime = datetime.datetime.now(pytz.timezone('Asia/Kolkata'))
 
-                # print("{}:{}".format(datetime.datetime.now(pytz.timezone('Asia/Kolkata')), token_dict[self.symbol]))
-                # sleep(1)
-                sleep(0.3)
-                self.price = float(token_dict[self.symbol]["LP"])
-                #print(f'{self.symbol}beginning of the loop')
+            interval = "1"  # ["1", "D"]
+            indices = False  # For Getting index data
+            df_ = alice.get_historical(instrument, from_datetime, to_datetime, interval, indices)
+            self.first_candle_high = max(df_.head(15)['high'])
+            token_dict[self.symbol]["FCH"] = self.first_candle_high
+            self.closing_price.append(df_['close'][14])
+            while True:
+                while start_time < \
+                        (datetime.datetime.now(pytz.timezone('Asia/Kolkata')).hour * 60 * 60 + datetime.datetime.now(
+                            pytz.timezone('Asia/Kolkata')).minute * 60 + datetime.datetime.now(
+                            pytz.timezone('Asia/Kolkata')).second) \
+                        < end_time:
 
-                if (datetime.datetime.now(pytz.timezone('Asia/Kolkata')).minute % 15) == 14 and datetime.datetime.now(
-                        pytz.timezone('Asia/Kolkata')).second == 59:
-                    self.closing_price.append(float(token_dict[self.symbol]["LP"]))
-                    #print('{} candle closing price at time {} is {}'.format(self.symbol, datetime.datetime.now(
-                     #   pytz.timezone('Asia/Kolkata')), float(token_dict[self.symbol]["LP"])))
-                    sleep(1)
+                    # print("{}:{}".format(datetime.datetime.now(pytz.timezone('Asia/Kolkata')), token_dict[self.symbol]))
+                    # sleep(1)
+                    sleep(0.3)
+                    self.pnl_list_for_dynamic_graph.append(float(token_dict[self.symbol]["PNL"]))
+                    self.price = float(token_dict[self.symbol]["LP"])
+                    #print(f'{self.symbol}beginning of the loop')
 
-                self.ema = self.get_ema_25()
-                token_dict[self.symbol]["EMA"] = self.ema
+                    if (datetime.datetime.now(pytz.timezone('Asia/Kolkata')).minute % 15) == 14 and datetime.datetime.now(
+                            pytz.timezone('Asia/Kolkata')).second == 59:
+                        self.closing_price.append(float(token_dict[self.symbol]["LP"]))
+                        self.logger.debug('{} candle closing price at time {} is {}'.format(self.symbol, datetime.datetime.now(
+                            pytz.timezone('Asia/Kolkata')), float(token_dict[self.symbol]["LP"])))
+                        sleep(1)
+                    
+                    if datetime.datetime.now(pytz.timezone('Asia/Kolkata')).second == 00:
+                        
+                        time_ = datetime.datetime.now(pytz.timezone('Asia/Kolkata')).strftime('%s')
+                        open_ = self.pnl_list_for_dynamic_graph[0]
+                        high_ = max(self.pnl_list_for_dynamic_graph)
+                        low_= min(self.pnl_list_for_dynamic_graph)
+                        close_ = int(token_dict[self.symbol]["PNL"])
+                        self.pnl_list_for_dynamic_graph.clear()
+                        candle_data_to_append = {"time": time_, "open": open_, "high": high_, "low":low_, "close": close_}
+                        print(candle_data_to_append)
+                        json.dump(candle_data_to_append, self.candle_data_file)
+                        self.candle_data_file.write('\n')
+                        self.candle_data_file.flush()
+                        os.fsync(self.candle_data_file)
+                        sleep(1)
 
-                token_dict[self.symbol]["BROKERAGE"] = self.short_brokerage + self.long_brokerage
+                    self.ema = self.get_ema_25()
+                    token_dict[self.symbol]["EMA"] = self.ema
 
-                if self.lng == True:
-                    token_dict[self.symbol]['PNL'] = self.long_pnl_booked + self.short_pnl_booked + (
-                            (float(token_dict[self.symbol]["LP"]) - token_dict[self.symbol][
-                                'LAST_ENTRY']) * self.quantity)
-                    #print(f'{self.symbol}calculating pnl lng')
+                    token_dict[self.symbol]["BROKERAGE"] = self.short_brokerage + self.long_brokerage
+
+                    if self.lng == True:
+                        token_dict[self.symbol]['PNL'] = self.long_pnl_booked + self.short_pnl_booked + (
+                                (float(token_dict[self.symbol]["LP"]) - token_dict[self.symbol][
+                                    'LAST_ENTRY']) * self.quantity)
+                        #print(f'{self.symbol}calculating pnl lng')
 
 
-                elif self.sht == True:
-                    token_dict[self.symbol]['PNL'] = self.long_pnl_booked + self.short_pnl_booked + (
-                            (token_dict[self.symbol]['LAST_ENTRY'] - float(
-                                token_dict[self.symbol]["LP"])) * self.quantity)
-                    #print(f'{self.symbol}calculating pnl sht')
+                    elif self.sht == True:
+                        token_dict[self.symbol]['PNL'] = self.long_pnl_booked + self.short_pnl_booked + (
+                                (token_dict[self.symbol]['LAST_ENTRY'] - float(
+                                    token_dict[self.symbol]["LP"])) * self.quantity)
+                        #print(f'{self.symbol}calculating pnl sht')
 
-                if self.first_trade:
-                    self.go_short(-1, "First_trade")
+                    if self.first_trade:
+                        self.go_short(-1, "First_trade")
 
-                while not self.price_crossed_ema:
-                    #print(f'{self.symbol} in not self.price_crossed_ema loop ')
+                    while not self.price_crossed_ema:
+                        #print(f'{self.symbol} in not self.price_crossed_ema loop ')
 
-                    if float(token_dict[self.symbol]["LP"]) > self.ema:
-                        #print(f'{self.symbol} in lp > ema loop ')
-                        if not self.price_greater_than_ema_loop:
-                            #print(f'{self.symbol}in not self.price_greater_than_ema_loop ')
-                            self.price_greater_than_ema_loop = True
-                            if self.price_greater_than_ema_loop == True and self.price_less_than_ema_loop == True:
-                                sleep(4)
+                        if float(token_dict[self.symbol]["LP"]) > self.ema:
+                            #print(f'{self.symbol} in lp > ema loop ')
+                            if not self.price_greater_than_ema_loop:
+                                #print(f'{self.symbol}in not self.price_greater_than_ema_loop ')
+                                self.price_greater_than_ema_loop = True
+                                if self.price_greater_than_ema_loop == True and self.price_less_than_ema_loop == True:
+                                    sleep(4)
+                                    #print(
+                                    #    f'{self.symbol}in self.price_greater_than_ema_loop == True and self.price_less_than_ema_loop == True ')
+                                    if token_dict[self.symbol]["LP"] > self.ema:
+                                        # print(f'{self.symbol}in token_dict[self.symbol]["LP"] > self.ema')
+                                        self.price_crossed_ema = True
+                                        self.price = token_dict[self.symbol]["LP"]
+                                        self.lng_counter = 5
+                                        break
+                                    else:
+                                        self.price_greater_than_ema_loop = False
+                            if float(token_dict[self.symbol]["LP"]) > self.first_candle_high and self.sht == True:
                                 #print(
-                                #    f'{self.symbol}in self.price_greater_than_ema_loop == True and self.price_less_than_ema_loop == True ')
-                                if token_dict[self.symbol]["LP"] > self.ema:
-                                    # print(f'{self.symbol}in token_dict[self.symbol]["LP"] > self.ema')
-                                    self.price_crossed_ema = True
-                                    self.price = token_dict[self.symbol]["LP"]
-                                    self.lng_counter = 5
+                                #    f'{self.symbol}in float(token_dict[self.symbol]["LP"]) > self.first_candle_high calling long function')
+                                pos_close = None
+                                pos_close = self.close_short_pos(self.first_candle_high)
+                                #print('closed short pos')
+                                if pos_close:
+                                    while True:
+                                        if (datetime.datetime.now(
+                                                pytz.timezone('Asia/Kolkata')).minute % 15) == 14 and datetime.datetime.now(
+                                            pytz.timezone('Asia/Kolkata')).second == 58:
+                                            self.temp_closing_candle_variable = token_dict[self.symbol]["LP"]
+                                            #print(f'{self.symbol}waiting for candle too close')
+                                            break
+
+                                    if self.temp_closing_candle_variable < self.first_candle_high:
+                                        #print(
+                                        #    f'{self.symbol}in self.temp_closing_candle_variable < self.first_candle_high:')
+                                        #print(f'{self.symbol}calling go short')
+                                        self.go_short(self.first_candle_high, "FCH")
+                                        break
+                            '''
+                            elif float(token_dict[self.symbol]["LP"]) < self.first_candle_high and self.lng == True:
+                                print(
+                                    f'{self.symbol}in token_dict[self.symbol]["LP"]) < self.first_candle_high and self.lng == True:')
+                                print(f'{self.symbol}calling close_long_pos')
+                                pos_close = None
+                                pos_close = self.close_long_pos(self.first_candle_high)
+                                if pos_close:
+                                    while True:
+                                        if (datetime.datetime.now(
+                                                pytz.timezone('Asia/Kolkata')).minute % 5) == 4 and datetime.datetime.now(
+                                            pytz.timezone('Asia/Kolkata')).second == 58:
+                                            self.temp_closing_candle_variable = token_dict[self.symbol]["LP"]
+                                            print(f'{self.symbol}waiting for candle to close')
+                                            break
+                                    if self.temp_closing_candle_variable > self.first_candle_high:
+                                        # print(f'{self.symbol}in self.temp_closing_candle_variable > self.first_candle_high:')
+                                        # print(f'{self.symbol}calling go_long')
+                                        # self.go_long(self.first_candle_high, "FCH")
+                                        break
+                                    elif self.temp_closing_candle_variable < self.first_candle_high:
+                                        print(
+                                            f'{self.symbol}in self.temp_closing_candle_variable < self.first_candle_high:')
+                                        print(f'{self.symbol}calling go_sht')
+                                        self.go_short(self.first_candle_high, "FCH")
+                                        break
+                                                                '''
+
+
+
+                        elif float(token_dict[self.symbol]["LP"]) < self.ema:
+                            #print(f'{self.symbol}in float(token_dict[self.symbol]["LP"]) < self.ema')
+                            if not self.price_less_than_ema_loop:
+                                #print(f'{self.symbol}in not self.price_less_than_ema_loop: ')
+                                self.price_less_than_ema_loop = True
+
+                                if self.price_greater_than_ema_loop == True and self.price_less_than_ema_loop == True:
+                                    sleep(4)
+                                    #print(
+                                    #    f'{self.symbol}in self.price_greater_than_ema_loop == True and self.price_less_than_ema_loop == True:')
+                                    if token_dict[self.symbol]["LP"] < self.ema:
+                                        #print(f'{self.symbol}in token_dict[self.symbol]["LP"] < self.ema:')
+                                        self.price_crossed_ema = True
+                                        self.price = token_dict[self.symbol]["LP"]
+                                        self.sht_counter = 5
+                                        break
+                                    else:
+                                        #print('self.price_less_than_ema_loop = False')
+                                        self.price_less_than_ema_loop = False
+
+                            if float(token_dict[self.symbol]["LP"]) > self.first_candle_high and self.sht == True:
+                                #print(
+                                #    f'{self.symbol}in float(token_dict[self.symbol]["LP"]) > self.first_candle_high calling long function')
+                                self.close_short_pos(self.first_candle_high)
+                                while True:
+                                    if (datetime.datetime.now(
+                                            pytz.timezone('Asia/Kolkata')).minute % 15) == 14 and datetime.datetime.now(
+                                        pytz.timezone('Asia/Kolkata')).second == 58:
+                                        self.temp_closing_candle_variable = token_dict[self.symbol]["LP"]
+                                        #print(f'{self.symbol}waiting for candle to close')
+                                        break
+
+                                if self.temp_closing_candle_variable < self.first_candle_high:
+                                    #print(f'{self.symbol}in self.temp_closing_candle_variable < self.first_candle_high:')
+                                    #print(f'{self.symbol}calling go_sht')
+                                    self.go_short(self.first_candle_high, "FCH")
                                     break
+                            '''
+                            elif float(token_dict[self.symbol]["LP"]) < self.first_candle_high and self.lng == True:
+                                print(
+                                    f'{self.symbol}in float(token_dict[self.symbol]["LP"]) < self.first_candle_high and self.lng == True:')
+                                self.close_long_pos(self.first_candle_high)
+                                pos_close = None
+                                print(f'{self.symbol}close_lng_pos')
+                                if pos_close:
+                                    while True:
+                                        if (datetime.datetime.now(
+                                                pytz.timezone('Asia/Kolkata')).minute % 5) == 4 and datetime.datetime.now(
+                                            pytz.timezone('Asia/Kolkata')).second == 58:
+                                            self.temp_closing_candle_variable = token_dict[self.symbol]["LP"]
+                                            print(f'{self.symbol}waiting for candle to close')
+                                            break
+                                    if self.temp_closing_candle_variable > self.first_candle_high:
+                                        # print(f'{self.symbol}self.temp_closing_candle_variable > self.first_candle_high:')
+                                        # print(f'{self.symbol}go_lng')
+                                        # self.go_long(self.first_candle_high, "FCH")
+                                        break
+                                    elif self.temp_closing_candle_variable < self.first_candle_high:
+                                        print(f'{self.symbol}self.temp_closing_candle_variable < self.first_candle_high:')
+                                        print(f'{self.symbol}go_sht')
+                                        self.go_short(self.first_candle_high, "FCH")
+                                        break
                                 else:
-                                    self.price_greater_than_ema_loop = False
-                        if float(token_dict[self.symbol]["LP"]) > self.first_candle_high and self.sht == True:
-                            #print(
-                            #    f'{self.symbol}in float(token_dict[self.symbol]["LP"]) > self.first_candle_high calling long function')
+                                    break
+                                '''
+                        break
+
+                    while self.price_crossed_ema:
+                        #print(f'{self.symbol}in while self.price_crossed_ema:')
+                        if float(token_dict[self.symbol]["LP"]) > self.ema and self.sht == True:
+                            #print(f'{self.symbol}in float(token_dict[self.symbol]["LP"]) > self.ema: calling long fun')
                             pos_close = None
-                            pos_close = self.close_short_pos(self.first_candle_high)
-                            #print('closed short pos')
+                            pos_close = self.close_short_pos(self.ema)
                             if pos_close:
                                 while True:
                                     if (datetime.datetime.now(
                                             pytz.timezone('Asia/Kolkata')).minute % 15) == 14 and datetime.datetime.now(
                                         pytz.timezone('Asia/Kolkata')).second == 58:
                                         self.temp_closing_candle_variable = token_dict[self.symbol]["LP"]
-                                        #print(f'{self.symbol}waiting for candle too close')
+                                        #print(f'{self.symbol} waiting for candle to close')
                                         break
 
-                                if self.temp_closing_candle_variable < self.first_candle_high:
-                                    #print(
-                                    #    f'{self.symbol}in self.temp_closing_candle_variable < self.first_candle_high:')
-                                    #print(f'{self.symbol}calling go short')
-                                    self.go_short(self.first_candle_high, "FCH")
+                                if self.temp_closing_candle_variable < self.ema:
+                                    #print(f'{self.symbol}self.temp_closing_candle_variable < self.ema:')
+                                    #print(f'{self.symbol}go_sht')
+                                    self.go_short(self.ema, "EMA")
                                     break
-                        '''
-                        elif float(token_dict[self.symbol]["LP"]) < self.first_candle_high and self.lng == True:
-                            print(
-                                f'{self.symbol}in token_dict[self.symbol]["LP"]) < self.first_candle_high and self.lng == True:')
-                            print(f'{self.symbol}calling close_long_pos')
-                            pos_close = None
-                            pos_close = self.close_long_pos(self.first_candle_high)
-                            if pos_close:
-                                while True:
-                                    if (datetime.datetime.now(
-                                            pytz.timezone('Asia/Kolkata')).minute % 5) == 4 and datetime.datetime.now(
-                                        pytz.timezone('Asia/Kolkata')).second == 58:
-                                        self.temp_closing_candle_variable = token_dict[self.symbol]["LP"]
-                                        print(f'{self.symbol}waiting for candle to close')
-                                        break
-                                if self.temp_closing_candle_variable > self.first_candle_high:
-                                    # print(f'{self.symbol}in self.temp_closing_candle_variable > self.first_candle_high:')
-                                    # print(f'{self.symbol}calling go_long')
-                                    # self.go_long(self.first_candle_high, "FCH")
-                                    break
-                                elif self.temp_closing_candle_variable < self.first_candle_high:
-                                    print(
-                                        f'{self.symbol}in self.temp_closing_candle_variable < self.first_candle_high:')
-                                    print(f'{self.symbol}calling go_sht')
-                                    self.go_short(self.first_candle_high, "FCH")
-                                    break
-                                                            '''
+                            else:
+                                break
 
+                        elif float(token_dict[self.symbol]["LP"]) < self.ema and self.sht == False:
+                            print(f'{self.symbol}in float(token_dict[self.symbol]["LP"]) < self.ema: calling long fun')
+                            #pos_close = None
+                            #pos_close = self.close_long_pos(self.ema)
+                            print(f'{self.symbol}close_lng_pos')
 
-
-                    elif float(token_dict[self.symbol]["LP"]) < self.ema:
-                        #print(f'{self.symbol}in float(token_dict[self.symbol]["LP"]) < self.ema')
-                        if not self.price_less_than_ema_loop:
-                            #print(f'{self.symbol}in not self.price_less_than_ema_loop: ')
-                            self.price_less_than_ema_loop = True
-
-                            if self.price_greater_than_ema_loop == True and self.price_less_than_ema_loop == True:
-                                sleep(4)
-                                #print(
-                                #    f'{self.symbol}in self.price_greater_than_ema_loop == True and self.price_less_than_ema_loop == True:')
-                                if token_dict[self.symbol]["LP"] < self.ema:
-                                    #print(f'{self.symbol}in token_dict[self.symbol]["LP"] < self.ema:')
-                                    self.price_crossed_ema = True
-                                    self.price = token_dict[self.symbol]["LP"]
-                                    self.sht_counter = 5
-                                    break
-                                else:
-                                    #print('self.price_less_than_ema_loop = False')
-                                    self.price_less_than_ema_loop = False
-
-                        if float(token_dict[self.symbol]["LP"]) > self.first_candle_high and self.sht == True:
-                            #print(
-                            #    f'{self.symbol}in float(token_dict[self.symbol]["LP"]) > self.first_candle_high calling long function')
-                            self.close_short_pos(self.first_candle_high)
                             while True:
                                 if (datetime.datetime.now(
                                         pytz.timezone('Asia/Kolkata')).minute % 15) == 14 and datetime.datetime.now(
@@ -426,110 +535,40 @@ class check_entries(threading.Thread):
                                     self.temp_closing_candle_variable = token_dict[self.symbol]["LP"]
                                     #print(f'{self.symbol}waiting for candle to close')
                                     break
-
-                            if self.temp_closing_candle_variable < self.first_candle_high:
-                                #print(f'{self.symbol}in self.temp_closing_candle_variable < self.first_candle_high:')
-                                #print(f'{self.symbol}calling go_sht')
-                                self.go_short(self.first_candle_high, "FCH")
+                            if self.temp_closing_candle_variable > self.ema:
+                                # print(f'{self.symbol}self.temp_closing_candle_variable > self.ema:')
+                                # print(f'{self.symbol}go_lng')
+                                # self.go_long(self.ema, "EMA")
                                 break
-                        '''
-                        elif float(token_dict[self.symbol]["LP"]) < self.first_candle_high and self.lng == True:
-                            print(
-                                f'{self.symbol}in float(token_dict[self.symbol]["LP"]) < self.first_candle_high and self.lng == True:')
-                            self.close_long_pos(self.first_candle_high)
-                            pos_close = None
-                            print(f'{self.symbol}close_lng_pos')
-                            if pos_close:
-                                while True:
-                                    if (datetime.datetime.now(
-                                            pytz.timezone('Asia/Kolkata')).minute % 5) == 4 and datetime.datetime.now(
-                                        pytz.timezone('Asia/Kolkata')).second == 58:
-                                        self.temp_closing_candle_variable = token_dict[self.symbol]["LP"]
-                                        print(f'{self.symbol}waiting for candle to close')
-                                        break
-                                if self.temp_closing_candle_variable > self.first_candle_high:
-                                    # print(f'{self.symbol}self.temp_closing_candle_variable > self.first_candle_high:')
-                                    # print(f'{self.symbol}go_lng')
-                                    # self.go_long(self.first_candle_high, "FCH")
-                                    break
-                                elif self.temp_closing_candle_variable < self.first_candle_high:
-                                    print(f'{self.symbol}self.temp_closing_candle_variable < self.first_candle_high:')
-                                    print(f'{self.symbol}go_sht')
-                                    self.go_short(self.first_candle_high, "FCH")
-                                    break
-                            else:
-                                break
-                            '''
-                    break
-
-                while self.price_crossed_ema:
-                    #print(f'{self.symbol}in while self.price_crossed_ema:')
-                    if float(token_dict[self.symbol]["LP"]) > self.ema and self.sht == True:
-                        #print(f'{self.symbol}in float(token_dict[self.symbol]["LP"]) > self.ema: calling long fun')
-                        pos_close = None
-                        pos_close = self.close_short_pos(self.ema)
-                        if pos_close:
-                            while True:
-                                if (datetime.datetime.now(
-                                        pytz.timezone('Asia/Kolkata')).minute % 15) == 14 and datetime.datetime.now(
-                                    pytz.timezone('Asia/Kolkata')).second == 58:
-                                    self.temp_closing_candle_variable = token_dict[self.symbol]["LP"]
-                                    #print(f'{self.symbol} waiting for candle to close')
-                                    break
-
-                            if self.temp_closing_candle_variable < self.ema:
+                            elif self.temp_closing_candle_variable < self.ema:
                                 #print(f'{self.symbol}self.temp_closing_candle_variable < self.ema:')
                                 #print(f'{self.symbol}go_sht')
                                 self.go_short(self.ema, "EMA")
                                 break
-                        else:
-                            break
-
-                    elif float(token_dict[self.symbol]["LP"]) < self.ema and self.sht == False:
-                        print(f'{self.symbol}in float(token_dict[self.symbol]["LP"]) < self.ema: calling long fun')
-                        #pos_close = None
-                        #pos_close = self.close_long_pos(self.ema)
-                        print(f'{self.symbol}close_lng_pos')
-
-                        while True:
-                            if (datetime.datetime.now(
-                                    pytz.timezone('Asia/Kolkata')).minute % 15) == 14 and datetime.datetime.now(
-                                pytz.timezone('Asia/Kolkata')).second == 58:
-                                self.temp_closing_candle_variable = token_dict[self.symbol]["LP"]
-                                #print(f'{self.symbol}waiting for candle to close')
-                                break
-                        if self.temp_closing_candle_variable > self.ema:
-                            # print(f'{self.symbol}self.temp_closing_candle_variable > self.ema:')
-                            # print(f'{self.symbol}go_lng')
-                            # self.go_long(self.ema, "EMA")
-                            break
-                        elif self.temp_closing_candle_variable < self.ema:
-                            #print(f'{self.symbol}self.temp_closing_candle_variable < self.ema:')
-                            #print(f'{self.symbol}go_sht')
-                            self.go_short(self.ema, "EMA")
-                            break
-                    else:
+                        #else:
+                        #    break
+                    
                         break
-                
-                    break
 
                 self.exit_open_positions()
+                token_dict[self.symbol]["BROKERAGE"] = self.short_brokerage + self.long_brokerage
+                break
 
                 '''
-                elif float(token_dict[self.symbol]["LP"]) > self.ema and self.closing_price[-1] < self.ema:
-                    self.close_short_pos(self.ema)
-                    break
-                elif float(token_dict[self.symbol]["LP"]) < self.ema and self.closing_price[-1] < self.ema:
-                    # print(f'{self.symbol}in float(token_dict[self.symbol]["LP"]) < self.ema: calling sht fun')
-                    self.go_short(self.ema, "EMA")
-                    break
-                elif float(token_dict[self.symbol]["LP"]) < self.ema and self.closing_price[-1] > self.ema:
-                    self.close_long_pos(self.ema)
-                    break
-            # time_now = (datetime.datetime.now(pytz.timezone('Asia/Kolkata')).hour * 60 * 60 + datetime.datetime.now(
-            #    pytz.timezone('Asia/Kolkata')).minute * 60 + datetime.datetime.now(
-            #    pytz.timezone('Asia/Kolkata')).second)
-            '''
+                    elif float(token_dict[self.symbol]["LP"]) > self.ema and self.closing_price[-1] < self.ema:
+                        self.close_short_pos(self.ema)
+                        break
+                    elif float(token_dict[self.symbol]["LP"]) < self.ema and self.closing_price[-1] < self.ema:
+                        # print(f'{self.symbol}in float(token_dict[self.symbol]["LP"]) < self.ema: calling sht fun')
+                        self.go_short(self.ema, "EMA")
+                        break
+                    elif float(token_dict[self.symbol]["LP"]) < self.ema and self.closing_price[-1] > self.ema:
+                        self.close_long_pos(self.ema)
+                        break
+                # time_now = (datetime.datetime.now(pytz.timezone('Asia/Kolkata')).hour * 60 * 60 + datetime.datetime.now(
+                #    pytz.timezone('Asia/Kolkata')).minute * 60 + datetime.datetime.now(
+                #    pytz.timezone('Asia/Kolkata')).second)
+                '''
 
     def go_long(self, pivot, reason):
         print(f'{self.symbol}in go long func')
@@ -549,7 +588,7 @@ class check_entries(threading.Thread):
                 token_dict[self.symbol]["POS"] = "LONG"
                 # self.sht = False
                 self.lng_counter = 0
-                print('{} went long at price-{}, time-{}:{}:{}'.format(self.symbol,
+                self.logger.debug('{} went long at price-{}, time-{}:{}:{}'.format(self.symbol,
                                                                        self.price,
                                                                        datetime.datetime.now(
                                                                            pytz.timezone('Asia/Kolkata')).hour,
@@ -561,6 +600,9 @@ class check_entries(threading.Thread):
                                                                                'Asia/Kolkata')).second))
                 token_dict[self.symbol]['LAST_ENTRY'] = float(token_dict[self.symbol]["LP"])
                 self.long_entry_price.append(float(token_dict[self.symbol]["LP"]))
+
+                self.logger.debug(f'long entry dict:{self.long_entry_price}')
+                self.logger.debug(f'long exit dict:{self.long_exit_price}')
                 # self.short_exit_price.append(float(token_dict[self.symbol]["LP"]))
 
                 # self.price_crossed_ema = True if reason == "EMA" else False
@@ -582,7 +624,7 @@ class check_entries(threading.Thread):
         while self.first_trade:
             #print(f'{self.symbol}in self.first_trade:')
             self.short_entry_price.append(self.price)
-            print('{} went short at price-{}, time-{}:{}:{}'.format(self.symbol,
+            self.logger.debug('{} went short at price-{}, time-{}:{}:{}'.format(self.symbol,
                                                                     self.price,
                                                                     datetime.datetime.now(
                                                                         pytz.timezone('Asia/Kolkata')).hour,
@@ -595,6 +637,7 @@ class check_entries(threading.Thread):
             token_dict[self.symbol]["POS"] = "SHORT"
             token_dict[self.symbol]["NOE"] = token_dict[self.symbol]["NOE"] + 1
             token_dict[self.symbol]["LAST_ENTRY"] = self.price
+            self.logger.debug(f'short entry dict: {self.short_entry_price}')
             break
 
             # if len(self.long_entry_price) == len(self.long_exit_price):
@@ -617,7 +660,7 @@ class check_entries(threading.Thread):
                 token_dict[self.symbol]["POS"] = "SHORT"
                 # self.lng = False
                 self.sht_counter = 0
-                print('{} went short at price-{}, time-{}:{}:{}'.format(self.symbol,
+                self.logger.debug('{} went short at price-{}, time-{}:{}:{}'.format(self.symbol,
                                                                         self.price,
                                                                         datetime.datetime.now(
                                                                             pytz.timezone('Asia/Kolkata')).hour,
@@ -630,18 +673,19 @@ class check_entries(threading.Thread):
                 token_dict[self.symbol]['LAST_ENTRY'] = float(token_dict[self.symbol]["LP"])
                 # self.long_exit_price.append(float(token_dict[self.symbol]["LP"]))
                 self.short_entry_price.append(float(token_dict[self.symbol]["LP"]))
-                # self.price_crossed_ema = True if reason == "EMA" else False
+                self.logger.debug(f'short entry dict: {self.short_entry_price}')
+                self.price_crossed_ema = True if reason == "EMA" else False
 
-                # if len(self.long_entry_price) == len(self.long_exit_price):
-                #    self.long_pnl_booked = self.long_pnl_booked + ((
-                #                                                           self.long_exit_price[
-                #                                                               len(self.long_exit_price) - 1] -
-                #                                                           self.long_entry_price[
-                #                                                               len(self.long_entry_price) - 1]) * self.quantity)
+                if len(self.long_entry_price) == len(self.long_exit_price):
+                    self.long_pnl_booked = self.long_pnl_booked + ((
+                                                                           self.long_exit_price[
+                                                                               len(self.long_exit_price) - 1] -
+                                                                           self.long_entry_price[
+                                                                               len(self.long_entry_price) - 1]) * self.quantity)
 
-                #            self.long_brokerage = self.long_brokerage + self.calc_brokerage(
-                #        self.long_entry_price[len(self.long_entry_price) - 1], self.long_exit_price[
-                #            len(self.long_exit_price) - 1], "LONG")
+                    self.long_brokerage = self.long_brokerage + self.calc_brokerage(
+                        self.long_entry_price[len(self.long_entry_price) - 1], self.long_exit_price[
+                            len(self.long_exit_price) - 1], "LONG")
 
     def close_long_pos(self, pivot):
         #print('in close_long_pos')
@@ -650,9 +694,12 @@ class check_entries(threading.Thread):
             sleep(6)
             if (token_dict[self.symbol]['LP'] < pivot) and self.lng == True:
 
-                print('square-off {} at price {}'.format(self.symbol, token_dict[self.symbol]['LP']))
+                self.logger.debug('square-off {} at price {}'.format(self.symbol, token_dict[self.symbol]['LP']))
                 token_dict[self.symbol]['POS'] = ' '
                 self.long_exit_price.append(token_dict[self.symbol]['LP'])
+                er.debug(f'long entry dict: {self.long_entry_price}')
+                er.debug(f'long exit dict: {self.long_exit_price}')
+                er.debug(f'last entry was at : {self.long_entry_price[-1]} and exit at: {self.long_exit_price[-1]}')
                 self.lng = False
 
                 if len(self.long_entry_price) == len(self.long_exit_price):
@@ -679,12 +726,17 @@ class check_entries(threading.Thread):
                 self.short_exit_price.append(token_dict[self.symbol]['LP'])
                 self.sht = False
 
+                self.logger.debug(f'short entry dict: {self.short_entry_price}')
+                self.logger.debug(f'short exit dict: {self.short_exit_price}')
+                self.logger.debug(f'last entry was at : {self.short_entry_price[-1]} and exit at: {self.short_exit_price[-1]}')
+
                 if len(self.short_entry_price) == len(self.short_exit_price):
                     self.short_pnl_booked = self.short_pnl_booked + ((
                                                                              self.short_entry_price[
                                                                                  len(self.short_entry_price) - 1] -
                                                                              self.short_exit_price[
                                                                                  len(self.short_exit_price) - 1]) * self.quantity)
+                    self.logger.debug(f'short pnl booked until now:{self.short_pnl_booked}')
 
                     self.short_brokerage = self.short_brokerage + self.calc_brokerage(
                         self.short_entry_price[len(self.short_entry_price) - 1], self.short_exit_price[
@@ -694,7 +746,7 @@ class check_entries(threading.Thread):
 
     def hedge(self):
         self.go_long(0,'HEDGE')
-        print('HEDGE-{} went long at price-{}, time-{}:{}:{}'.format(self.symbol,
+        self.logger.debug('HEDGE-{} went long at price-{}, time-{}:{}:{}'.format(self.symbol,
                                                                      self.price,
                                                                      datetime.datetime.now(
                                                                          pytz.timezone('Asia/Kolkata')).hour,
@@ -715,6 +767,22 @@ class check_entries(threading.Thread):
             if self.lng == True:
                 token_dict[self.symbol]['PNL'] = (
                         (token_dict[self.symbol]['LP'] - token_dict[self.symbol]['LAST_ENTRY']) * self.quantity)
+
+                if datetime.datetime.now(pytz.timezone('Asia/Kolkata')).second == 00:
+                        
+                        time_ = datetime.datetime.now(pytz.timezone('Asia/Kolkata')).strftime('%s')
+                        open_ = self.pnl_list_for_dynamic_graph[0]
+                        high_ = max(self.pnl_list_for_dynamic_graph)
+                        low_= min(self.pnl_list_for_dynamic_graph)
+                        close_ = int(token_dict[self.symbol]["PNL"])
+                        self.pnl_list_for_dynamic_graph.clear()
+                        candle_data_to_append = {"time": time_, "open": open_, "high": high_, "low":low_, "close": close_}
+                        print(candle_data_to_append)
+                        json.dump(candle_data_to_append, self.candle_data_file)
+                        self.candle_data_file.write('\n')
+                        self.candle_data_file.flush()
+                        os.fsync(self.candle_data_file)
+                        sleep(1)
                 sleep(1)
 
     def exit_open_positions(self):
@@ -731,10 +799,9 @@ class check_entries(threading.Thread):
                                                                        datetime.datetime.now(
                                                                            pytz.timezone(
                                                                                'Asia/Kolkata')).second))
-            
-            token_dict[self.symbol]['PNL'] = self.long_pnl_booked + self.short_pnl_booked + (
-                    (float(token_dict[self.symbol]["LP"]) - token_dict[self.symbol][
-                        'LAST_ENTRY']) * self.quantity)
+            self.long_brokerage = self.long_brokerage + self.calc_brokerage(
+                        self.long_entry_price[len(self.long_entry_price) - 1], self.long_exit_price[
+                            len(self.long_exit_price) - 1], "LONG")
             
             self.lng = False
 
@@ -751,9 +818,10 @@ class check_entries(threading.Thread):
                                                                             pytz.timezone(
                                                                                 'Asia/Kolkata')).second))
         
-            token_dict[self.symbol]['PNL'] = self.long_pnl_booked + self.short_pnl_booked + (
-                    (token_dict[self.symbol]['LAST_ENTRY'] - float(
-                        token_dict[self.symbol]["LP"])) * self.quantity)
+
+            self.short_brokerage = self.short_brokerage + self.calc_brokerage(
+                self.short_entry_price[len(self.short_entry_price) - 1], self.short_exit_price[
+                    len(self.short_exit_price) - 1], "SHORT")
             
             self.sht = False
 
@@ -852,7 +920,7 @@ def stuff():
             <td>  {instrument}   </td>
             <td>  {lp}   </td>
             <td>  {pos}   </td>
-            <td style="color:{font_color}">  {pnl}   </td>
+            <td onclick="showPopup('{path_to_candle_data}')" style="color:{font_color}">  {pnl}   </td>
             <td>  {brokerage}   </td>
             <td>  {last_entry}   </td>
             <td>  {ema}   </td>
@@ -865,7 +933,8 @@ def stuff():
                    pos=token_dict[x]["POS"],
                    pnl=round(token_dict[x]["PNL"], 2), brokerage=round(token_dict[x]["BROKERAGE"], 2),
                    last_entry=round(token_dict[x]["LAST_ENTRY"], 2), ema=round(token_dict[x]["EMA"], 2),
-                   fch=round(token_dict[x]["FCH"], 2), noe=int(token_dict[x]["NOE"]))
+                   fch=round(token_dict[x]["FCH"], 2), noe=int(token_dict[x]["NOE"]),
+                   path_to_candle_data = f'../instrument_data/{x}/candle_data.jsonl')
 
         if x[0] == "N":
             NIFTY_TOTAL_PNL_list.append(token_dict[x]["PNL"])
@@ -896,7 +965,7 @@ def stuff():
          
 
     updated_html2 = """
-    <tr>
+    <tr class="bg-light sticky-top top-0">
             <td>  {NIFTY_TOTAL_PNL}   </td>
             <td>  {NIFTY_TOTAL_BROKERAGE}   </td>
             <td style="color:{font_color_nifty}">  {NIFTY_NET_PNL}   </td>
@@ -931,7 +1000,7 @@ def stuff():
 
     html1 = """
         <table class="table table-striped" id="rearrangeable-table">
-            <thead>
+            <thead class="bg-light sticky-top top-0">
                 <tr>
                     <td>  <strong> INSTRUMENT  </strong> </td>
                     <td>  <strong> LP  </strong>  </td>
@@ -944,7 +1013,9 @@ def stuff():
                     <td>  <strong> NOE  </strong>  </td>
                 </tr>
             </thead>
-            {}
+            <tbody>
+                {}
+            </tbody>
         </table>
         """.format(updated_html)
 
@@ -1141,6 +1212,12 @@ def get_subscribe_list(banknifty_atm,nifty_atm,finnifty_atm,expiry_banknifty,exp
 
 if __name__ == '__main__':
 
+    logging.basicConfig(level=logging.DEBUG, format="%(asctime)s - %(message)s")
+    root_logger = logging.getLogger()
+    if root_logger.handlers:
+        for handler in root_logger.handlers:
+            root_logger.removeHandler(handler)
+
     year_dict = {'JAN': '01', 'FEB': '02', 'MAR': '03', 'APR': '04', 'MAY': '05', 'JUN': '06', 'JUL': '07', 'AUG': '08',
                  'SEP': '09', 'OCT': '10', 'NOV': '11', 'DEC': '12'}
 
@@ -1178,9 +1255,9 @@ if __name__ == '__main__':
                                                                   pytz.timezone('Asia/Kolkata')).minute))
     if datetime.datetime.now(pytz.timezone('Asia/Kolkata')).hour >= 9 \
                 and datetime.datetime.now(pytz.timezone('Asia/Kolkata')).minute >= 31:
-                min = 0
+                minut = 31
     else:
-        min = 31
+        minut = 0
     while True:
         if datetime.datetime.now(pytz.timezone('Asia/Kolkata')).hour >= 9 \
                 and datetime.datetime.now(pytz.timezone('Asia/Kolkata')).minute >= 31 \
@@ -1297,8 +1374,11 @@ if __name__ == '__main__':
                                  finnifty_quantity,is_hedge=False)
     FN_OTM_PE_50 = check_entries(str(get_symbol('FINNIFTY', finnifty_atm, 100, 'P', expiry_format_finnifty)),
                                  finnifty_quantity,is_hedge=False)
-    FN_ITM_CE_50 = check_entries(str(get_symbol('FINNIFTY', finnifty_atm, -100, 'C', expiry_format_finnifty)),
+    FN_ITM_CE_50 = check_entries(str(get_symbol('FINNIFTY', finnifty_atm, -100, 'P', expiry_format_finnifty)),
                                  finnifty_quantity,is_hedge=False)
+    
+    
+    
     FN_HEDGE_CE_50 = check_entries(str(get_symbol('FINNIFTY', finnifty_atm, 50, 'C', expiry_format_finnifty)),
                                  finnifty_quantity/2,is_hedge=True)
     FN_HEDGE_PE_50 = check_entries(str(get_symbol('FINNIFTY', finnifty_atm, -50, 'P', expiry_format_finnifty)),
@@ -1477,7 +1557,7 @@ if __name__ == '__main__':
     # N_HEDGE_PE.hedge()
 
     # app.run()
-    p = Process(target=app.run(host='0.0.0.0'))
+    p = Process(target=app.run(host='0.0.0.0',port=5000))
     p.start()
 
     # BN_HEDGE_CE.hedge()

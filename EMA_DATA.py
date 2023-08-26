@@ -10,7 +10,7 @@ from retrying import retry
 
 
 
-@retry(stop_max_attempt_number=3, wait_fixed=5000)
+@retry(stop_max_attempt_number=3, wait_fixed=10000)
 def gen_data():
     # User Credential
     user_id = '771791'
