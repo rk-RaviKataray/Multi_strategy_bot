@@ -9,8 +9,15 @@ import pathlib
 from retrying import retry
 
 
+def is_current_date_greater_than_latest_expiry(string_input_with_date):
+    # string_input_with_date = "2023-08-03"
+    past = datetime.datetime.strptime(string_input_with_date, "%Y-%m-%d")
+    present = datetime.datetime.now()
+    return past.date() < present.date()
 
-@retry(stop_max_attempt_number=3, wait_fixed=10000)
+
+
+@retry(stop_max_attempt_number=1, wait_fixed=10000)
 def gen_data():
     # User Credential
     user_id = '771791'
@@ -29,6 +36,8 @@ def gen_data():
 
     print('STEP-1: NFO DATA DOWNLOAD COMPLETE')
 
+    #print(alice.get_instrument_by_token('INDICES', 26000))
+
     nifty = alice.get_scrip_info(alice.get_instrument_by_token('INDICES', 26000))
     bank_nifty = alice.get_scrip_info(alice.get_instrument_by_token('INDICES', 26009))
     fin_nifty = alice.get_scrip_info(alice.get_instrument_by_token('INDICES', 26037))
@@ -36,6 +45,7 @@ def gen_data():
 
 
     print("STEP-2: CALCULATING ATM AT CLOSE")
+    #print(bank_nifty)
 
     nifty_close_atm = round(float(nifty['PrvClose']), -2)
     bank_nifty_close_atm = round(float(bank_nifty['PrvClose']), -2)
@@ -53,13 +63,17 @@ def gen_data():
     expiry_banknifty = expiry_bnnifty_df['Expiry Date'].sort_values().drop_duplicates().reset_index(drop=True)
     expiry_finnifty = expiry_finnifty_df['Expiry Date'].sort_values().drop_duplicates().reset_index(drop=True)
 
+    nifty_expiry = expiry_nifty[1] if is_current_date_greater_than_latest_expiry(expiry_nifty[0]) else expiry_nifty[0]
+    banknifty_expiry = expiry_banknifty[1] if is_current_date_greater_than_latest_expiry(expiry_banknifty[0]) else expiry_banknifty[0]
+    finnifty_expiry = expiry_finnifty[1] if is_current_date_greater_than_latest_expiry(expiry_finnifty[0]) else expiry_finnifty[0]
 
-    nifty_expiry = expiry_nifty[0] if str(datetime.datetime.now(pytz.timezone('Asia/Kolkata')).date()) == str(
-        expiry_nifty[0]) else expiry_nifty[0]
-    banknifty_expiry = expiry_banknifty[0] if str(datetime.datetime.now(pytz.timezone('Asia/Kolkata')).date()) == str(
-        expiry_banknifty[0]) else expiry_banknifty[0]
-    finnifty_expiry = expiry_finnifty[0] if str(datetime.datetime.now(pytz.timezone('Asia/Kolkata')).date()) == str(
-        expiry_finnifty[0]) else expiry_finnifty[0]
+
+    # nifty_expiry = expiry_nifty[0] if str(datetime.datetime.now(pytz.timezone('Asia/Kolkata')).date()) == str(
+    #     expiry_nifty[0]) else expiry_nifty[0]
+    # banknifty_expiry = expiry_banknifty[0] if str(datetime.datetime.now(pytz.timezone('Asia/Kolkata')).date()) == str(
+    #     expiry_banknifty[0]) else expiry_banknifty[0]
+    # finnifty_expiry = expiry_finnifty[0] if str(datetime.datetime.now(pytz.timezone('Asia/Kolkata')).date()) == str(
+    #     expiry_finnifty[0]) else expiry_finnifty[0]
 
     print("UPCOMING EXPIRIES:\n")
     print("NIFTY : {}\n".format(nifty_expiry))
@@ -81,7 +95,7 @@ def gen_data():
             if date_.strftime('%A') == 'Monday':
                 days = 3
             else:
-                days = 1
+                days = 1                                                     #                <-----------------------------
 
             instrument = alice.get_instrument_for_fno(exch='NFO', symbol=symbol, expiry_date=expiry, is_fut=False,
                                                     strike=strike, is_CE=True if o_type == "CE" else False)
@@ -94,13 +108,15 @@ def gen_data():
             interval = "1"  # ["1", "D"]
             indices = False  # For Getting index data
             df_ = alice.get_historical(instrument, from_datetime, to_datetime, interval, indices)
-            #print(df_)
+            print(df_)
             lst = []
             for i in range(len(df_)):
                 if (int(df_['datetime'][i].split(' ')[1].split(':')[1])) % 15 == 14:
                     lst.append(df_['close'][i])
+
             dic[trading_symbol] = lst
-        except:
+        except Exception as e:
+            print(e)
             print("{} instrument not tradable".format(trading_symbol))
 
     def get_expiry_date_trading_symbol(expiry_):
@@ -123,7 +139,10 @@ def gen_data():
 
     for x in range(-20, 20):
         create_dic("BANKNIFTY", banknifty_expiry, int(bank_nifty_close_atm) + (x * 100), "CE", expiry_format_banknifty)
+        
         create_dic("BANKNIFTY", banknifty_expiry, int(bank_nifty_close_atm) + (x * 100), "PE", expiry_format_banknifty)
+    
+    sleep(65)
 
     print("STEP-4: GENERATING DATA FOR NIFTY........")
     print("NON TRADABLE INSTRUMENTS NIFTY:")
@@ -131,6 +150,7 @@ def gen_data():
     for x in range(-10, 11):
         create_dic("NIFTY", nifty_expiry, nifty_close_atm + (x * 100), "CE", expiry_format_nifty)
         create_dic("NIFTY", nifty_expiry, nifty_close_atm + (x * 100), "PE", expiry_format_nifty)
+    sleep(65)
 
     print("STEP-5: GENERATING DATA FOR FINNIFTY........")
     print("NON TRADABLE INSTRUMENTS FINNIFTY:")

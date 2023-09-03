@@ -1,0 +1,55 @@
+2023-08-31 09:30:15,214 - BANKNIFTY31AUG23P43500 went short at price-8.3, time-9:30:15
+2023-08-31 09:30:15,214 - short entry dict: [0.0, 8.3]
+2023-08-31 09:44:59,036 - BANKNIFTY31AUG23P43500 candle closing price at time 2023-08-31 09:44:59.036785+05:30 is 3.95
+2023-08-31 09:59:59,035 - BANKNIFTY31AUG23P43500 candle closing price at time 2023-08-31 09:59:59.035299+05:30 is 3.6
+2023-08-31 10:14:59,288 - BANKNIFTY31AUG23P43500 candle closing price at time 2023-08-31 10:14:59.288471+05:30 is 3.95
+2023-08-31 10:29:59,209 - BANKNIFTY31AUG23P43500 candle closing price at time 2023-08-31 10:29:59.209671+05:30 is 4.55
+2023-08-31 10:37:42,708 - short entry dict: [0.0, 8.3]
+2023-08-31 10:37:42,713 - short exit dict: [0.0, 5.9]
+2023-08-31 10:37:42,718 - last entry was at : 8.3 and exit at: 5.9
+2023-08-31 10:37:42,723 - short pnl booked until now:720.0000000000001
+2023-08-31 10:44:59,204 - BANKNIFTY31AUG23P43500 candle closing price at time 2023-08-31 10:44:59.204004+05:30 is 5.9
+2023-08-31 10:59:58,001 - BANKNIFTY31AUG23P43500 went short at price-4.9, time-10:59:58
+2023-08-31 10:59:58,002 - short entry dict: [0.0, 8.3, 4.9]
+2023-08-31 10:59:59,206 - BANKNIFTY31AUG23P43500 candle closing price at time 2023-08-31 10:59:59.206354+05:30 is 4.85
+2023-08-31 11:03:19,935 - short entry dict: [0.0, 8.3, 4.9]
+2023-08-31 11:03:19,936 - short exit dict: [0.0, 5.9, 5.85]
+2023-08-31 11:03:19,936 - last entry was at : 4.9 and exit at: 5.85
+2023-08-31 11:03:19,936 - short pnl booked until now:435.00000000000034
+2023-08-31 11:14:58,000 - BANKNIFTY31AUG23P43500 went short at price-5.2, time-11:14:58
+2023-08-31 11:14:58,001 - short entry dict: [0.0, 8.3, 4.9, 5.2]
+2023-08-31 11:14:59,206 - BANKNIFTY31AUG23P43500 candle closing price at time 2023-08-31 11:14:59.205991+05:30 is 5.2
+2023-08-31 11:17:13,557 - short entry dict: [0.0, 8.3, 4.9, 5.2]
+2023-08-31 11:17:13,558 - short exit dict: [0.0, 5.9, 5.85, 6.1]
+2023-08-31 11:17:13,558 - last entry was at : 5.2 and exit at: 6.1
+2023-08-31 11:17:13,558 - short pnl booked until now:165.0000000000005
+2023-08-31 11:29:58,003 - BANKNIFTY31AUG23P43500 went short at price-5.5, time-11:29:58
+2023-08-31 11:29:58,003 - short entry dict: [0.0, 8.3, 4.9, 5.2, 5.5]
+2023-08-31 11:29:59,207 - BANKNIFTY31AUG23P43500 candle closing price at time 2023-08-31 11:29:59.207206+05:30 is 5.4
+2023-08-31 11:30:19,571 - short entry dict: [0.0, 8.3, 4.9, 5.2, 5.5]
+2023-08-31 11:30:19,576 - short exit dict: [0.0, 5.9, 5.85, 6.1, 5.8]
+2023-08-31 11:30:19,581 - last entry was at : 5.5 and exit at: 5.8
+2023-08-31 11:30:19,586 - short pnl booked until now:75.00000000000057
+2023-08-31 11:44:58,000 - BANKNIFTY31AUG23P43500 went short at price-4.9, time-11:44:58
+2023-08-31 11:44:58,001 - short entry dict: [0.0, 8.3, 4.9, 5.2, 5.5, 4.9]
+2023-08-31 11:44:59,205 - BANKNIFTY31AUG23P43500 candle closing price at time 2023-08-31 11:44:59.205547+05:30 is 4.9
+2023-08-31 11:49:47,164 - short entry dict: [0.0, 8.3, 4.9, 5.2, 5.5, 4.9]
+2023-08-31 11:49:47,170 - short exit dict: [0.0, 5.9, 5.85, 6.1, 5.8, 5.65]
+2023-08-31 11:49:47,175 - last entry was at : 4.9 and exit at: 5.65
+2023-08-31 11:49:47,180 - short pnl booked until now:-149.99999999999943
+2023-08-31 11:59:59,204 - BANKNIFTY31AUG23P43500 candle closing price at time 2023-08-31 11:59:59.204624+05:30 is 5.7
+2023-08-31 12:14:59,204 - BANKNIFTY31AUG23P43500 candle closing price at time 2023-08-31 12:14:59.204446+05:30 is 5.7
+2023-08-31 12:29:58,000 - BANKNIFTY31AUG23P43500 went short at price-4.7, time-12:29:58
+2023-08-31 12:29:58,001 - short entry dict: [0.0, 8.3, 4.9, 5.2, 5.5, 4.9, 4.7]
+2023-08-31 12:29:59,204 - BANKNIFTY31AUG23P43500 candle closing price at time 2023-08-31 12:29:59.204281+05:30 is 4.8
+2023-08-31 12:44:59,206 - BANKNIFTY31AUG23P43500 candle closing price at time 2023-08-31 12:44:59.206860+05:30 is 4.8
+2023-08-31 12:59:59,297 - BANKNIFTY31AUG23P43500 candle closing price at time 2023-08-31 12:59:59.297852+05:30 is 4.1
+2023-08-31 13:14:59,200 - BANKNIFTY31AUG23P43500 candle closing price at time 2023-08-31 13:14:59.200298+05:30 is 4.5
+2023-08-31 13:29:59,036 - BANKNIFTY31AUG23P43500 candle closing price at time 2023-08-31 13:29:59.036127+05:30 is 3.6
+2023-08-31 13:44:59,286 - BANKNIFTY31AUG23P43500 candle closing price at time 2023-08-31 13:44:59.285967+05:30 is 2.35
+2023-08-31 13:59:59,253 - BANKNIFTY31AUG23P43500 candle closing price at time 2023-08-31 13:59:59.253838+05:30 is 2.25
+2023-08-31 14:14:59,282 - BANKNIFTY31AUG23P43500 candle closing price at time 2023-08-31 14:14:59.281955+05:30 is 2.8
+2023-08-31 14:29:59,032 - BANKNIFTY31AUG23P43500 candle closing price at time 2023-08-31 14:29:59.032053+05:30 is 1.5
+2023-08-31 14:44:59,258 - BANKNIFTY31AUG23P43500 candle closing price at time 2023-08-31 14:44:59.258871+05:30 is 1.2
+2023-08-31 14:59:59,250 - BANKNIFTY31AUG23P43500 candle closing price at time 2023-08-31 14:59:59.250798+05:30 is 0.4
+2023-08-31 15:14:59,092 - BANKNIFTY31AUG23P43500 candle closing price at time 2023-08-31 15:14:59.092380+05:30 is 0.1

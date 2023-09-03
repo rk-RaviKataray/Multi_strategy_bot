@@ -1,0 +1,53 @@
+2023-08-24 09:31:19,064 - FINNIFTY29AUG23P19900 went short at price-115.3, time-9:31:19
+2023-08-24 09:31:19,064 - short entry dict: [0.0, 115.3]
+2023-08-24 09:44:59,228 - FINNIFTY29AUG23P19900 candle closing price at time 2023-08-24 09:44:59.228863+05:30 is 92.0
+2023-08-24 09:59:59,272 - FINNIFTY29AUG23P19900 candle closing price at time 2023-08-24 09:59:59.272856+05:30 is 93.55
+2023-08-24 10:14:59,073 - FINNIFTY29AUG23P19900 candle closing price at time 2023-08-24 10:14:59.073551+05:30 is 92.65
+2023-08-24 10:29:59,205 - FINNIFTY29AUG23P19900 candle closing price at time 2023-08-24 10:29:59.205838+05:30 is 101.65
+2023-08-24 10:44:59,105 - FINNIFTY29AUG23P19900 candle closing price at time 2023-08-24 10:44:59.105570+05:30 is 103.45
+2023-08-24 10:59:59,207 - FINNIFTY29AUG23P19900 candle closing price at time 2023-08-24 10:59:59.207883+05:30 is 123.95
+2023-08-24 11:14:59,016 - FINNIFTY29AUG23P19900 candle closing price at time 2023-08-24 11:14:59.016547+05:30 is 133.0
+2023-08-24 11:29:59,081 - FINNIFTY29AUG23P19900 candle closing price at time 2023-08-24 11:29:59.081247+05:30 is 133.6
+2023-08-24 11:44:59,274 - FINNIFTY29AUG23P19900 candle closing price at time 2023-08-24 11:44:59.274536+05:30 is 124.25
+2023-08-24 11:59:59,195 - FINNIFTY29AUG23P19900 candle closing price at time 2023-08-24 11:59:59.195115+05:30 is 135.3
+2023-08-24 12:14:59,214 - FINNIFTY29AUG23P19900 candle closing price at time 2023-08-24 12:14:59.214361+05:30 is 149.6
+2023-08-24 12:25:56,993 - short entry dict: [0.0, 115.3]
+2023-08-24 12:25:56,993 - short exit dict: [0.0, 161.4]
+2023-08-24 12:25:56,993 - last entry was at : 115.3 and exit at: 161.4
+2023-08-24 12:25:56,993 - short pnl booked until now:-7376.000000000002
+2023-08-24 12:29:59,208 - FINNIFTY29AUG23P19900 candle closing price at time 2023-08-24 12:29:59.207889+05:30 is 167.9
+2023-08-24 12:44:59,202 - FINNIFTY29AUG23P19900 candle closing price at time 2023-08-24 12:44:59.202675+05:30 is 143.7
+2023-08-24 12:59:59,026 - FINNIFTY29AUG23P19900 candle closing price at time 2023-08-24 12:59:59.026249+05:30 is 158.1
+2023-08-24 13:14:59,124 - FINNIFTY29AUG23P19900 candle closing price at time 2023-08-24 13:14:59.124562+05:30 is 167.55
+2023-08-24 13:29:58,005 - FINNIFTY29AUG23P19900 went short at price-167.8, time-13:29:58
+2023-08-24 13:29:58,005 - short entry dict: [0.0, 115.3, 167.8]
+2023-08-24 13:29:59,210 - FINNIFTY29AUG23P19900 candle closing price at time 2023-08-24 13:29:59.210757+05:30 is 167.8
+2023-08-24 13:38:18,313 - short entry dict: [0.0, 115.3, 167.8]
+2023-08-24 13:38:18,313 - short exit dict: [0.0, 161.4, 173.5]
+2023-08-24 13:38:18,313 - last entry was at : 167.8 and exit at: 173.5
+2023-08-24 13:38:18,313 - short pnl booked until now:-8288.0
+2023-08-24 13:44:58,002 - FINNIFTY29AUG23P19900 went short at price-168.0, time-13:44:58
+2023-08-24 13:44:58,002 - short entry dict: [0.0, 115.3, 167.8, 168.0]
+2023-08-24 13:44:59,209 - FINNIFTY29AUG23P19900 candle closing price at time 2023-08-24 13:44:59.209168+05:30 is 168.6
+2023-08-24 13:59:14,949 - short entry dict: [0.0, 115.3, 167.8, 168.0]
+2023-08-24 13:59:14,949 - short exit dict: [0.0, 161.4, 173.5, 172.75]
+2023-08-24 13:59:14,949 - last entry was at : 168.0 and exit at: 172.75
+2023-08-24 13:59:14,949 - short pnl booked until now:-9048.0
+2023-08-24 13:59:59,205 - FINNIFTY29AUG23P19900 candle closing price at time 2023-08-24 13:59:59.204893+05:30 is 173.45
+2023-08-24 14:14:58,001 - FINNIFTY29AUG23P19900 went short at price-155.5, time-14:14:58
+2023-08-24 14:14:58,002 - short entry dict: [0.0, 115.3, 167.8, 168.0, 155.5]
+2023-08-24 14:14:59,207 - FINNIFTY29AUG23P19900 candle closing price at time 2023-08-24 14:14:59.207220+05:30 is 155.35
+2023-08-24 14:24:05,145 - short entry dict: [0.0, 115.3, 167.8, 168.0, 155.5]
+2023-08-24 14:24:05,145 - short exit dict: [0.0, 161.4, 173.5, 172.75, 171.3]
+2023-08-24 14:24:05,145 - last entry was at : 155.5 and exit at: 171.3
+2023-08-24 14:24:05,145 - short pnl booked until now:-11576.000000000002
+2023-08-24 14:29:58,001 - FINNIFTY29AUG23P19900 went short at price-165.15, time-14:29:58
+2023-08-24 14:29:58,004 - short entry dict: [0.0, 115.3, 167.8, 168.0, 155.5, 165.15]
+2023-08-24 14:29:59,210 - FINNIFTY29AUG23P19900 candle closing price at time 2023-08-24 14:29:59.210580+05:30 is 165.15
+2023-08-24 14:32:52,961 - short entry dict: [0.0, 115.3, 167.8, 168.0, 155.5, 165.15]
+2023-08-24 14:32:52,961 - short exit dict: [0.0, 161.4, 173.5, 172.75, 171.3, 171.7]
+2023-08-24 14:32:52,961 - last entry was at : 165.15 and exit at: 171.7
+2023-08-24 14:32:52,961 - short pnl booked until now:-12624.0
+2023-08-24 14:44:59,213 - FINNIFTY29AUG23P19900 candle closing price at time 2023-08-24 14:44:59.213875+05:30 is 171.95
+2023-08-24 14:59:59,122 - FINNIFTY29AUG23P19900 candle closing price at time 2023-08-24 14:59:59.122799+05:30 is 188.3
+2023-08-24 15:14:59,006 - FINNIFTY29AUG23P19900 candle closing price at time 2023-08-24 15:14:59.006343+05:30 is 187.3

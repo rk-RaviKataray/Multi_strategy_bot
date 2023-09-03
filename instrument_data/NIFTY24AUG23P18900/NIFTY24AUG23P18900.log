@@ -1,0 +1,12 @@
+2023-08-21 09:31:16,655 - NIFTY24AUG23P18900 went long at price-3.8, time-9:31:16
+2023-08-21 09:31:16,656 - long entry dict:[0.0, 3.8]
+2023-08-21 09:31:16,656 - long exit dict:[0.0]
+2023-08-21 09:31:16,656 - HEDGE-NIFTY24AUG23P18900 went long at price-3.8, time-9:31:16
+2023-08-22 09:31:17,218 - NIFTY24AUG23P18900 went long at price-2.35, time-9:31:17
+2023-08-22 09:31:17,219 - long entry dict:[0.0, 2.35]
+2023-08-22 09:31:17,219 - long exit dict:[0.0]
+2023-08-22 09:31:17,219 - HEDGE-NIFTY24AUG23P18900 went long at price-2.35, time-9:31:17
+2023-08-23 09:31:12,224 - NIFTY24AUG23P18900 went long at price-1.15, time-9:31:12
+2023-08-23 09:31:12,225 - long entry dict:[0.0, 1.15]
+2023-08-23 09:31:12,225 - long exit dict:[0.0]
+2023-08-23 09:31:12,225 - HEDGE-NIFTY24AUG23P18900 went long at price-1.15, time-9:31:12

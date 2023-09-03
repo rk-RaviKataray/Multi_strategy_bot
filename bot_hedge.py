@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, render_template, request
+from flask import Flask, jsonify, render_template, request, send_file
 import webbrowser
 import time as t
 import threading
@@ -12,15 +12,27 @@ import pathlib
 from multiprocessing import Process
 from UltraDict import UltraDict
 import retrying
+from flask_cors import CORS
+
+def is_current_date_greater_than_latest_expiry(string_input_with_date):
+    # string_input_with_date = "2023-08-03"
+    past = datetime.datetime.strptime(string_input_with_date, "%Y-%m-%d")
+    present = datetime.datetime.now()
+    return past.date() < present.date()
 
 
 
 app = Flask(__name__)
+CORS(app, origins=["https://purple-artist-lvljo.ineuron.app:5000"]) 
+
+
 
 
 # User Credential
 user_id = '771791'
 api_key = 'jOf1uqDV2objI4Obj33QuoTN4Iz7qXD0mW5X0WgupaH8k9NvWV0hqifsdN6Rf1vmEmGEbHJsLq448Kkt6tU7u5qocJyOTQOYJAxxcq1dyqHzs1br5IGFnpsQrPUATctt'
+
+
 
 # Connect and get session Id
 alice = Aliceblue(user_id=user_id, api_key=api_key)
@@ -46,11 +58,11 @@ token_dict = {
                       '''
 
 token_dict['NIFTY_SPOT'] = {"TOKEN": 0, "LP": 0.0, "POS": "", "PNL": 0.0, "LAST_ENTRY": 0, "EMA": 0, "FCH": 0, "NOE": 0,
-                            "BROKERAGE": 0}
+                            "BROKERAGE": 0, "QUANTITY":0}
 token_dict['BANKNIFTY_SPOT'] = {"TOKEN": 0, "LP": 0.0, "POS": "", "PNL": 0.0, "LAST_ENTRY": 0, "EMA": 0, "FCH": 0,
-                                "NOE": 0, "BROKERAGE": 0}
+                                "NOE": 0, "BROKERAGE": 0,"QUANTITY":0}
 token_dict['FINNIFTY_SPOT'] = {"TOKEN": 0, "LP": 0.0, "POS": "", "PNL": 0.0, "LAST_ENTRY": 0, "EMA": 0, "FCH": 0,
-                               "NOE": 0, "BROKERAGE": 0}
+                               "NOE": 0, "BROKERAGE": 0,"QUANTITY":0}
 
 socket_opened = False
 subscribe_flag = False
@@ -80,13 +92,16 @@ FINNIFTY_TOTAL_PNL = 0
 FINNIFTY_TOTAL_BROKERAGE = 0
 FINNIFTY_NET_PNL = 0
 FINNIFTY_TOTAL_ENTRIES = 0
+N_time_ = 0
+BN_time_ = 0
+FN_time_= 0
 
-NIFTY_GROSS_PNL_LIST_FOR_GRAPH = []
-NIFTY_NET_PNL_LIST_FOR_GRAPH = []
-BANKNIFTY_GROSS_PNL_LIST_FOR_GRAPH = []
-BANKNIFTY_NET_PNL_LIST_FOR_GRAPH = []
 
-TIME_STAMP_FOR_GRAPH = []
+
+N_pnl_list_for_dynamic_graph = []
+BN_pnl_list_for_dynamic_graph = []
+FN_pnl_list_for_dynamic_graph = []
+
 
 # Opening JSON file
 with open('data_ema.json', 'r') as openfile:
@@ -100,9 +115,16 @@ expiry_finnifty_df = df[df['Symbol'] == 'FINNIFTY']
 expiry_nifty = expiry_nifty_df['Expiry Date'].sort_values().drop_duplicates().reset_index(drop=True)
 expiry_banknifty = expiry_bnnifty_df['Expiry Date'].sort_values().drop_duplicates().reset_index(drop=True)
 expiry_finnifty = expiry_finnifty_df['Expiry Date'].sort_values().drop_duplicates().reset_index(drop=True)
-print('next nifty expiry is on {}'.format(expiry_nifty[0]))
-print('next banknifty expiry is on {}'.format(expiry_banknifty[0]))
-print('next finnifty expiry is on {}'.format(expiry_finnifty[0]))
+
+
+expiry_nifty = expiry_nifty[1] if is_current_date_greater_than_latest_expiry(expiry_nifty[0]) else expiry_nifty[0]
+expiry_banknifty = expiry_banknifty[1] if is_current_date_greater_than_latest_expiry(expiry_banknifty[0]) else expiry_banknifty[0]
+expiry_finnifty = expiry_finnifty[1] if is_current_date_greater_than_latest_expiry(expiry_finnifty[0]) else expiry_finnifty[0]
+
+
+print('next nifty expiry is on {}'.format(expiry_nifty))
+print('next banknifty expiry is on {}'.format(expiry_banknifty))
+print('next finnifty expiry is on {}'.format(expiry_finnifty))
 
 
 def socket():
@@ -111,7 +133,7 @@ def socket():
         global socket_opened
         socket_opened = True
         if subscribe_flag:  # This is used to resubscribe the script when reconnect the socket.
-            alice.subscribe(get_subscribe_list(banknifty_atm,nifty_atm,finnifty_atm,expiry_banknifty[0],expiry_nifty[0],expiry_finnifty[0]))
+            alice.subscribe(get_subscribe_list(banknifty_atm,nifty_atm,finnifty_atm,expiry_banknifty[1],expiry_nifty[1],expiry_finnifty[0]))
 
     def socket_close():  # On Socket close this callback function will trigger
         global socket_opened, LTP
@@ -138,11 +160,11 @@ def socket():
             print("Token Acknowledgement status :%s " % feed_message)
             print("-------------------------------------------------------------------------------")
             Token_Acknowledgement_status = feed_message
-            if Token_Acknowledgement_status["ts"] not in token_dict.keys():
+            if Token_Acknowledgement_status["ts"] not in token_dict.keys():  
                 token_dict[Token_Acknowledgement_status['ts']] = {"TOKEN": Token_Acknowledgement_status['tk'],
                                                                   "LP": LTP, "POS": "", "PNL": 0.0, "LAST_ENTRY": 0.0,
                                                                   "EMA": 0.0, "FCH": 0.0, "NOE": 0.0,
-                                                                  "BROKERAGE": 0.0}
+                                                                  "BROKERAGE": 0.0,"QUANTITY":0}
             pass
         else:
             # print("Feed :", feed_message)
@@ -220,7 +242,6 @@ class check_entries(threading.Thread):
         self.long_pnl_booked = 0
         self.short_pnl_booked = 0
         self.first_trade = True
-        
         self.first_candle_high = 0
         self.hedge_entry_price = []
         self.hedge_exit_price = []
@@ -257,6 +278,9 @@ class check_entries(threading.Thread):
 
     def run(self):
 
+        if not os.path.exists(f"./instrument_data/{self.symbol}"):
+            os.makedirs(f"./instrument_data/{self.symbol}")
+
         with open(f"./instrument_data/{self.symbol}/candle_data.jsonl", 'a') as self.candle_data_file:
 
             global token_dict
@@ -271,6 +295,12 @@ class check_entries(threading.Thread):
             token_dict[self.symbol]['POS'] = ""
             token_dict[self.symbol]["EMA"] = 0.0
             token_dict[self.symbol]["FCH"] = 0.0
+            token_dict[self.symbol]["QUANTITY"] = self.quantity
+
+
+            # while True:
+            #     sleep(1)
+
 
             if self.is_hedge:
                 self.hedge()
@@ -279,13 +309,13 @@ class check_entries(threading.Thread):
 
             if self.symbol[0] == "B":
                 symbol_ = 'BANKNIFTY'
-                expiry_date_ = str(expiry_banknifty[0])
+                expiry_date_ = str(expiry_banknifty)
             elif self.symbol[0] == "N":
                 symbol_ = 'NIFTY'
-                expiry_date_ = str(expiry_nifty[0])
+                expiry_date_ = str(expiry_nifty)
             elif self.symbol[0] == "F":
                 symbol_ = 'FINNIFTY'
-                expiry_date_ = str(expiry_finnifty[0])
+                expiry_date_ = str(expiry_finnifty)
 
             is_CE = True if self.symbol[-6] == "C" else False
 
@@ -332,8 +362,7 @@ class check_entries(threading.Thread):
                         low_= min(self.pnl_list_for_dynamic_graph)
                         close_ = int(token_dict[self.symbol]["PNL"])
                         self.pnl_list_for_dynamic_graph.clear()
-                        candle_data_to_append = {"time": time_, "open": open_, "high": high_, "low":low_, "close": close_}
-                        print(candle_data_to_append)
+                        candle_data_to_append = {"time": int(time_)+19800, "open": open_, "high": high_, "low":low_, "close": close_}
                         json.dump(candle_data_to_append, self.candle_data_file)
                         self.candle_data_file.write('\n')
                         self.candle_data_file.flush()
@@ -764,6 +793,7 @@ class check_entries(threading.Thread):
             time_now = (datetime.datetime.now(pytz.timezone('Asia/Kolkata')).hour * 60 * 60 + datetime.datetime.now(
                 pytz.timezone('Asia/Kolkata')).minute * 60 + datetime.datetime.now(
                 pytz.timezone('Asia/Kolkata')).second)
+            self.pnl_list_for_dynamic_graph.append(float(token_dict[self.symbol]["PNL"]))
             if self.lng == True:
                 token_dict[self.symbol]['PNL'] = (
                         (token_dict[self.symbol]['LP'] - token_dict[self.symbol]['LAST_ENTRY']) * self.quantity)
@@ -776,8 +806,7 @@ class check_entries(threading.Thread):
                         low_= min(self.pnl_list_for_dynamic_graph)
                         close_ = int(token_dict[self.symbol]["PNL"])
                         self.pnl_list_for_dynamic_graph.clear()
-                        candle_data_to_append = {"time": time_, "open": open_, "high": high_, "low":low_, "close": close_}
-                        print(candle_data_to_append)
+                        candle_data_to_append = {"time": int(time_)+19800, "open": open_, "high": high_, "low":low_, "close": close_}
                         json.dump(candle_data_to_append, self.candle_data_file)
                         self.candle_data_file.write('\n')
                         self.candle_data_file.flush()
@@ -884,24 +913,35 @@ class check_entries(threading.Thread):
 
 @app.route('/_stuff', methods=['GET','POST'])
 def stuff():
+
+
     NIFTY_TOTAL_PNL_list = []
     NIFTY_TOTAL_BROKERAGE_list = []
     NIFTY_TOTAL_ENTRIES_list = []
+    global N_pnl_list_for_dynamic_graph 
+    global N_time_
+
+
     BANKNIFTY_TOTAL_PNL_list = []
     BANKNIFTY_TOTAL_BROKERAGE_list = []
     BANKNIFTY_TOTAL_ENTRIES_list = []
+    global BN_pnl_list_for_dynamic_graph 
+    global BN_time_
+
+
     FINNIFTY_TOTAL_PNL_list = []
     FINNIFTY_TOTAL_BROKERAGE_list = []
     FINNIFTY_TOTAL_ENTRIES_list = []
+    global FN_pnl_list_for_dynamic_graph 
+    global FN_time_
+
     global token_dict
-    global NIFTY_GROSS_PNL_LIST_FOR_GRAPH
-    global NIFTY_NET_PNL_LIST_FOR_GRAPH
-    global BANKNIFTY_GROSS_PNL_LIST_FOR_GRAPH
-    global BANKNIFTY_NET_PNL_LIST_FOR_GRAPH
-    global TIME_STAMP_FOR_GRAPH
+
 
     # json2html.convert(json=input)
     updated_html = ""
+
+    
 
     for x in token_dict.keys():
 
@@ -913,19 +953,19 @@ def stuff():
             background_color = '#f6efc6'
         
     
-
-
         updated_html = updated_html + """
         <tr style="background-color: {background_color};">
             <td>  {instrument}   </td>
             <td>  {lp}   </td>
             <td>  {pos}   </td>
-            <td onclick="showPopup('{path_to_candle_data}')" style="color:{font_color}">  {pnl}   </td>
+            <td onclick="showPopup('{instrument}')" style="color:{font_color}">  {pnl}   </td>
             <td>  {brokerage}   </td>
             <td>  {last_entry}   </td>
             <td>  {ema}   </td>
             <td>  {fch}   </td>
             <td>  {noe}   </td>
+            <td>  {quantity}   </td>
+
         </tr>
         """.format(background_color = background_color,
                    font_color = '#009900' if token_dict[x]["PNL"] > 0 else '#fa2723' ,
@@ -934,29 +974,95 @@ def stuff():
                    pnl=round(token_dict[x]["PNL"], 2), brokerage=round(token_dict[x]["BROKERAGE"], 2),
                    last_entry=round(token_dict[x]["LAST_ENTRY"], 2), ema=round(token_dict[x]["EMA"], 2),
                    fch=round(token_dict[x]["FCH"], 2), noe=int(token_dict[x]["NOE"]),
-                   path_to_candle_data = f'../instrument_data/{x}/candle_data.jsonl')
+                   quantity = int(token_dict[x]["QUANTITY"])
+                  )
 
         if x[0] == "N":
             NIFTY_TOTAL_PNL_list.append(token_dict[x]["PNL"])
             NIFTY_TOTAL_BROKERAGE_list.append(token_dict[x]["BROKERAGE"])
             NIFTY_TOTAL_ENTRIES_list.append(token_dict[x]["NOE"])
+         
 
         elif x[0] == "B":
             BANKNIFTY_TOTAL_PNL_list.append(token_dict[x]["PNL"])
             BANKNIFTY_TOTAL_BROKERAGE_list.append(token_dict[x]["BROKERAGE"])
             BANKNIFTY_TOTAL_ENTRIES_list.append(token_dict[x]["NOE"])
+        
 
         elif x[0] == "F":
             FINNIFTY_TOTAL_PNL_list.append(token_dict[x]["PNL"])
             FINNIFTY_TOTAL_BROKERAGE_list.append(token_dict[x]["BROKERAGE"])
             FINNIFTY_TOTAL_ENTRIES_list.append(token_dict[x]["NOE"])
+     
+
 
     NIFTY_TOTAL_PNL = round(sum(NIFTY_TOTAL_PNL_list), 2)
     NIFTY_NET_PNL = round((sum(NIFTY_TOTAL_PNL_list) - sum(NIFTY_TOTAL_BROKERAGE_list)), 2)
+    N_pnl_list_for_dynamic_graph.append(NIFTY_NET_PNL)
+
+    if not os.path.exists("./instrument_data/NIFTY"):
+        os.makedirs("./instrument_data/NIFTY")
+
+    if datetime.datetime.now(pytz.timezone('Asia/Kolkata')).second == 00 and N_time_ != int(datetime.datetime.now(pytz.timezone('Asia/Kolkata')).strftime('%s')):
+        with open("./instrument_data/NIFTY/candle_data.jsonl", 'a') as N_candle_data_file:
+            N_time_ = int(datetime.datetime.now(pytz.timezone('Asia/Kolkata')).strftime('%s'))
+            N_open_ = N_pnl_list_for_dynamic_graph[0]
+            N_high_ = max(N_pnl_list_for_dynamic_graph)
+            N_low_= min(N_pnl_list_for_dynamic_graph)
+            N_close_ = int(NIFTY_NET_PNL)
+            N_pnl_list_for_dynamic_graph.clear()
+            N_candle_data_to_append = {"time": int(N_time_)+19800, "open": N_open_, "high": N_high_, "low":N_low_, "close": N_close_}
+            json.dump(N_candle_data_to_append, N_candle_data_file)
+            N_candle_data_file.write('\n')
+            N_candle_data_file.flush()
+            os.fsync(N_candle_data_file)
+
+
     BANKNIFTY_TOTAL_PNL = round(sum(BANKNIFTY_TOTAL_PNL_list), 2)
     BANKNIFTY_NET_PNL = round((sum(BANKNIFTY_TOTAL_PNL_list) - sum(BANKNIFTY_TOTAL_BROKERAGE_list)), 2)
+    BN_pnl_list_for_dynamic_graph.append(BANKNIFTY_NET_PNL)
+
+    if not os.path.exists("./instrument_data/BANKNIFTY"):
+        os.makedirs("./instrument_data/BANKNIFTY")
+
+    if datetime.datetime.now(pytz.timezone('Asia/Kolkata')).second == 00 and BN_time_ != int(datetime.datetime.now(pytz.timezone('Asia/Kolkata')).strftime('%s')):
+        with open("./instrument_data/BANKNIFTY/candle_data.jsonl", 'a') as BN_candle_data_file:
+            BN_time_ = int(datetime.datetime.now(pytz.timezone('Asia/Kolkata')).strftime('%s'))
+            BN_open_ = BN_pnl_list_for_dynamic_graph[0]
+            BN_high_ = max(BN_pnl_list_for_dynamic_graph)
+            BN_low_= min(BN_pnl_list_for_dynamic_graph)
+            BN_close_ = int(BANKNIFTY_NET_PNL)
+            BN_pnl_list_for_dynamic_graph.clear()
+            BN_candle_data_to_append = {"time": int(BN_time_)+19800, "open": BN_open_, "high": BN_high_, "low":BN_low_, "close": BN_close_}
+            json.dump(BN_candle_data_to_append, BN_candle_data_file)
+            BN_candle_data_file.write('\n')
+            BN_candle_data_file.flush()
+            os.fsync(BN_candle_data_file)
+
+
     FINNIFTY_TOTAL_PNL = round(sum(FINNIFTY_TOTAL_PNL_list), 2)
     FINNIFTY_NET_PNL = round((sum(FINNIFTY_TOTAL_PNL_list) - sum(FINNIFTY_TOTAL_BROKERAGE_list)), 2)
+    FN_pnl_list_for_dynamic_graph.append(FINNIFTY_NET_PNL)
+
+    if not os.path.exists("./instrument_data/FINNIFTY"):
+        os.makedirs("./instrument_data/FINNIFTY")
+
+    
+    if datetime.datetime.now(pytz.timezone('Asia/Kolkata')).second == 00 and FN_time_ != int(datetime.datetime.now(pytz.timezone('Asia/Kolkata')).strftime('%s')):
+        with open("./instrument_data/FINNIFTY/candle_data.jsonl", 'a') as FN_candle_data_file:
+            FN_time_ = int(datetime.datetime.now(pytz.timezone('Asia/Kolkata')).strftime('%s'))
+            FN_open_ = FN_pnl_list_for_dynamic_graph[0]
+            FN_high_ = max(FN_pnl_list_for_dynamic_graph)
+            FN_low_= min(FN_pnl_list_for_dynamic_graph)
+            FN_close_ = int(FINNIFTY_NET_PNL)
+            FN_pnl_list_for_dynamic_graph.clear()
+            FN_candle_data_to_append = {"time": int(FN_time_)+19800, "open": FN_open_, "high": FN_high_, "low":FN_low_, "close": FN_close_}
+            json.dump(FN_candle_data_to_append, FN_candle_data_file)
+            FN_candle_data_file.write('\n')
+            FN_candle_data_file.flush()
+            os.fsync(FN_candle_data_file)
+            
+
 
     font_kolor_total_nifty = '#009900' if NIFTY_NET_PNL > 0 else '#fa2723'
     font_kolor_total_banknifty = '#009900' if BANKNIFTY_NET_PNL > 0 else '#fa2723'
@@ -968,15 +1074,15 @@ def stuff():
     <tr class="bg-light sticky-top top-0">
             <td>  {NIFTY_TOTAL_PNL}   </td>
             <td>  {NIFTY_TOTAL_BROKERAGE}   </td>
-            <td style="color:{font_color_nifty}">  {NIFTY_NET_PNL}   </td>
+            <td onclick="showPopup('NIFTY')" style="color:{font_color_nifty}">  {NIFTY_NET_PNL}   </td>
             <td>  {NIFTY_TOTAL_ENTRIES}   </td>
             <td>  {BANKNIFTY_TOTAL_PNL}   </td>
             <td>  {BANKNIFTY_TOTAL_BROKERAGE}   </td>
-            <td style="color:{font_color_bn}">  {BANKNIFTY_NET_PNL}   </td>
+            <td onclick="showPopup('BANKNIFTY')" style="color:{font_color_bn}">  {BANKNIFTY_NET_PNL}   </td>
             <td>  {BANKNIFTY_TOTAL_ENTRIES}   </td>
             <td>  {FINNIFTY_TOTAL_PNL}  </td>
             <td>  {FINNIFTY_TOTAL_BROKERAGE}  </td>
-            <td style="color:{font_color_fn}">  {FINNIFTY_NET_PNL}  </td>
+            <td onclick="showPopup('FINNIFTY')" style="color:{font_color_fn}">  {FINNIFTY_NET_PNL}  </td>
             <td>  {FINNIFTY_TOTAL_ENTRIES}  </td>
 
 
@@ -1011,6 +1117,8 @@ def stuff():
                     <td>  <strong> EMA </strong>   </td>
                     <td>  <strong> FCH </strong>   </td>
                     <td>  <strong> NOE  </strong>  </td>
+                    <td>  <strong> QUANTITY  </strong>  </td>
+
                 </tr>
             </thead>
             <tbody>
@@ -1043,14 +1151,20 @@ def stuff():
 
     html = {"individual_html": html1, "summary_html": html2}
 
-    # NIFTY_GROSS_PNL_LIST_FOR_GRAPH.append(NIFTY_TOTAL_PNL)
-    # NIFTY_NET_PNL_LIST_FOR_GRAPH.append(NIFTY_NET_PNL)
-    # BANKNIFTY_GROSS_PNL_LIST_FOR_GRAPH.append(BANKNIFTY_TOTAL_PNL)
-    # BANKNIFTY_NET_PNL_LIST_FOR_GRAPH.append(BANKNIFTY_NET_PNL)
-
-    # TIME_STAMP_FOR_GRAPH.append(datetime.now(pytz.timezone('Asia/Kolkata')).strftime("%H:%M:%S"))
 
     return jsonify(result=html)
+
+
+@app.route('/api/candle_data/<filename>')
+def serve_file(filename):
+    try:
+        data_directory = os.path.join('instrument_data', filename,'candle_data.jsonl')
+    
+        # Send the file's content as the API response
+        return send_file(data_directory, mimetype='application/json')
+    except Exception as e:
+        print('Error serving file:', e)
+        return '', 500
 
 
 @app.route('/')
@@ -1210,6 +1324,7 @@ def get_subscribe_list(banknifty_atm,nifty_atm,finnifty_atm,expiry_banknifty,exp
     return subscribe_list
 
 
+
 if __name__ == '__main__':
 
     logging.basicConfig(level=logging.DEBUG, format="%(asctime)s - %(message)s")
@@ -1241,13 +1356,15 @@ if __name__ == '__main__':
         trading_symbol = base_symbol + expiry_ + option_type + striki
         return trading_symbol
 
+    
+
 
     socket()
     sleep(1.5)
 
-    expiry_format_banknifty = get_expiry_date_trading_symbol(str(expiry_banknifty[0]))
-    expiry_format_nifty = get_expiry_date_trading_symbol(str(expiry_nifty[0]))
-    expiry_format_finnifty = get_expiry_date_trading_symbol(str(expiry_finnifty[0]))
+    expiry_format_banknifty = get_expiry_date_trading_symbol(str(expiry_banknifty))
+    expiry_format_nifty = get_expiry_date_trading_symbol(str(expiry_nifty))
+    expiry_format_finnifty = get_expiry_date_trading_symbol(str(expiry_finnifty))
 
     print(
         "waiting for ATM at 9:20, current time- {}:{}".format(datetime.datetime.now(pytz.timezone('Asia/Kolkata')).hour,
@@ -1260,7 +1377,7 @@ if __name__ == '__main__':
         minut = 0
     while True:
         if datetime.datetime.now(pytz.timezone('Asia/Kolkata')).hour >= 9 \
-                and datetime.datetime.now(pytz.timezone('Asia/Kolkata')).minute >= 31 \
+                and datetime.datetime.now(pytz.timezone('Asia/Kolkata')).minute >= 00 \
                 and datetime.datetime.now(pytz.timezone('Asia/Kolkata')).second >= 00:
 
             global nifty_atm,banknifty_atm,finnifty_atm
@@ -1268,18 +1385,18 @@ if __name__ == '__main__':
             banknifty_atm = int(round(float(token_dict['BANKNIFTY_SPOT']["LP"]), -2))
             finnifty_atm = int(round(float(token_dict['FINNIFTY_SPOT']["LP"]), -2))
 
-            #nifty_atm = 19000
-            #banknifty_atm = 43000
-            #finnifty_atm = 19500
+            # nifty_atm = 19600
+            # banknifty_atm = 45400
+            # finnifty_atm = 20000
 
-            print("nifty atm = {} \nBanknifty atm = {} ".format(nifty_atm, banknifty_atm))
+            print("Nifty atm = {} \nBanknifty atm = {} \nFinnifty atm = {}".format(nifty_atm, banknifty_atm, finnifty_atm))
             break
 
 
     print("trying to resubcribe")
 
     
-    alice.subscribe(get_subscribe_list(banknifty_atm,nifty_atm,finnifty_atm,expiry_banknifty[0],expiry_nifty[0],expiry_finnifty[0]))
+    alice.subscribe(get_subscribe_list(banknifty_atm,nifty_atm,finnifty_atm,expiry_banknifty,expiry_nifty,expiry_finnifty))
     sleep(5)
 
     # ,nifty_quantity = 50
@@ -1403,8 +1520,8 @@ if __name__ == '__main__':
                   N_ITM_PE_100, N_ITM_PE_200
                   ]
 
-    N_call_list_HEDGE = [N_HEDGE_CE, N_HEDGE_CE_50, N_HEDGE_CE_150 ]
-    N_put_list_HEDGE= [N_HEDGE_PE, N_HEDGE_PE_50, N_HEDGE_PE_150  ]
+    N_call_list_HEDGE = [N_HEDGE_CE, N_HEDGE_CE_50, N_HEDGE_CE_150,N_HEDGE_PE, N_HEDGE_PE_50, N_HEDGE_PE_150 ]
+    N_put_list_HEDGE = [N_HEDGE_PE, N_HEDGE_PE_50, N_HEDGE_PE_150  ]
 
     # N_list1 = [N_ATM_CE,N_ATM_PE]
     # N_list2 = [N_OTM_CE_100, N_OTM_PE_100]
@@ -1433,7 +1550,7 @@ if __name__ == '__main__':
                    # BN_OTM_PE_100, BN_OTM_PE_200, BN_OTM_PE_300,
                    BN_ITM_PE_100, BN_ITM_PE_200, BN_ITM_PE_300]
 
-    BN_call_list_HEDGE = [BN_HEDGE_CE, BN_HEDGE_CE_100, BN_HEDGE_CE_300, BN_HEDGE_CE_500 ]
+    BN_call_list_HEDGE = [BN_HEDGE_CE, BN_HEDGE_CE_100, BN_HEDGE_CE_300, BN_HEDGE_CE_500,BN_HEDGE_PE, BN_HEDGE_PE_100, BN_HEDGE_PE_300, BN_HEDGE_PE_500 ]
     BN_put_list_HEDGE= [BN_HEDGE_PE, BN_HEDGE_PE_100, BN_HEDGE_PE_300, BN_HEDGE_PE_500 ]
 
     FN_call_list = [FN_ATM_CE, FN_OTM_CE_50
@@ -1443,7 +1560,7 @@ if __name__ == '__main__':
                    # , FN_OTM_PE_50,
                    FN_ITM_CE_50]
 
-    FN_call_list_HEDGE = [FN_HEDGE_CE, FN_HEDGE_CE_50 ]
+    FN_call_list_HEDGE = [FN_HEDGE_CE, FN_HEDGE_CE_50,FN_HEDGE_PE, FN_HEDGE_PE_50 ]
     FN_put_list_HEDGE= [FN_HEDGE_PE, FN_HEDGE_PE_50 ]
 
     # BANKNIFTY_OBJ_LIST = [BN_ATM_CE,
@@ -1472,7 +1589,7 @@ if __name__ == '__main__':
     N_PUT_PROCESS = processing_multi(N_put_list)
 
     N_CALL_HEDGE_PROCESS = processing_multi(N_call_list_HEDGE)
-    N_PUT_HEDGE_PROCESS = processing_multi(N_put_list_HEDGE)
+    #N_PUT_HEDGE_PROCESS = processing_multi(N_put_list_HEDGE)
 
     # N_PROCESS1 = processing_multi(N_list1)
     # N_PROCESS2 = processing_multi(N_list2)
@@ -1490,7 +1607,7 @@ if __name__ == '__main__':
     BN_PUT_PROCESS = processing_multi(BN_put_list)  # BN_HEDGE_PE
 
     BN_CALL_HEDGE_PROCESS = processing_multi(BN_call_list_HEDGE)
-    BN_PUT_HEDGE_PROCESS = processing_multi(BN_put_list_HEDGE)
+    #BN_PUT_HEDGE_PROCESS = processing_multi(BN_put_list_HEDGE)
 
     # BN_PROCESS1 = processing_multi(BN_list1)
     # BN_PROCESS2 = processing_multi(BN_list2)
@@ -1504,7 +1621,7 @@ if __name__ == '__main__':
     FN_PUT_PROCESS = processing_multi(FN_put_list)
 
     FN_CALL_HEDGE_PROCESS = processing_multi(FN_call_list_HEDGE)
-    FN_PUT_HEDGE_PROCESS = processing_multi(FN_put_list_HEDGE)
+    #FN_PUT_HEDGE_PROCESS = processing_multi(FN_put_list_HEDGE)
 
     # N_PROCESS1.start()
     # N_PROCESS2.start()
@@ -1516,19 +1633,19 @@ if __name__ == '__main__':
     N_PUT_PROCESS.start()
 
     N_CALL_HEDGE_PROCESS.start()
-    N_PUT_HEDGE_PROCESS.start()
+    #N_PUT_HEDGE_PROCESS.start()
 
     BN_CALL_PROCESS.start()
     BN_PUT_PROCESS.start()
 
     BN_CALL_HEDGE_PROCESS.start()
-    BN_PUT_HEDGE_PROCESS.start()
+    #BN_PUT_HEDGE_PROCESS.start()
 
     FN_CALL_PROCESS.start()
     FN_PUT_PROCESS.start()
 
     FN_CALL_HEDGE_PROCESS.start()
-    FN_PUT_HEDGE_PROCESS.start()
+    #FN_PUT_HEDGE_PROCESS.start()
 
     
 

@@ -8,7 +8,7 @@ let stopLoop = false;
  async function fetchHistoricData(fileName) {
         async function updateHistoricData(fileName) {
           while(!stopLoop){
-            await new Promise(r => setTimeout(r, 10000));
+            await new Promise(r => setTimeout(r, 62000));
             const response = await fetch(fileName);
             const text = await response.text();
 
@@ -30,6 +30,14 @@ let stopLoop = false;
         const chart = LightweightCharts.createChart(document.getElementById('popup-content'), {
           width: 800,
           height: 600,
+          watermark:{
+            color: 'rgba(255, 0, 0, 0.5)', // Watermark text color
+            fontSize: 16,                  // Watermark font size
+            horzAlign: 'center',           // Horizontal alignment: 'left', 'center', or 'right'
+            vertAlign: 'top',           // Vertical alignment: 'top', 'middle', or 'bottom'
+            visible: true,                 // Set to false to hide the watermark
+            text: fileName, // Watermark text
+        },
           crosshair: {
 		        mode: LightweightCharts.CrosshairMode.Normal,
             vertLine: {

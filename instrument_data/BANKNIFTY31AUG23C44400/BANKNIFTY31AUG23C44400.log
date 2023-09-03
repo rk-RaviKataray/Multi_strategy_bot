@@ -1,0 +1,8 @@
+2023-08-25 09:31:17,334 - BANKNIFTY31AUG23C44400 went long at price-219.65, time-9:31:17
+2023-08-25 09:31:17,334 - long entry dict:[0.0, 219.65]
+2023-08-25 09:31:17,334 - long exit dict:[0.0]
+2023-08-25 09:31:17,335 - HEDGE-BANKNIFTY31AUG23C44400 went long at price-219.65, time-9:31:17
+2023-08-31 09:30:13,994 - BANKNIFTY31AUG23C44400 went long at price-30.3, time-9:30:13
+2023-08-31 09:30:13,995 - long entry dict:[0.0, 30.3]
+2023-08-31 09:30:13,998 - long exit dict:[0.0]
+2023-08-31 09:30:13,999 - HEDGE-BANKNIFTY31AUG23C44400 went long at price-30.3, time-9:30:13
