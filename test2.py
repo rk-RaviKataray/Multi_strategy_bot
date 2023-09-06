@@ -50,6 +50,7 @@ def update_delta_dict_expected(base_symbol, target_delta):
                 if closest_key is None or difference < closest_difference:
                     closest_key = key
                     closest_difference = difference
+                    
         delta_dict_expected[base_symbol][abs(target_delta)][option_type] = closest_key    
         #print(delta_dict_expected)  
 

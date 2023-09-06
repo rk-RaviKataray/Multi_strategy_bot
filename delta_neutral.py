@@ -766,7 +766,7 @@ class check_entries(threading.Thread):
         return moving_averages.tolist()[-1]
 
 
-class delta_neutral(Process, check_entries):
+class delta_neutral(Process):
 
     def __init__(self,base_symbol,delta):
         super(delta_neutral, self).__init__()
@@ -805,10 +805,6 @@ class delta_neutral(Process, check_entries):
 
                 expected_put_strike_obj.go_short()
                 delta_dict_current[self.base_symbol][self.delta]['PUT'] = expected_put_strike_obj
-
-
-            call_strike_need_to_be_shorted = adjust_strikes(call_strike_obj)
-            put_strike_need_to_be_shorted= adjust_strikes(put_strike_obj)
 
 
             sleep(5)
@@ -1053,7 +1049,8 @@ def stuff():
         </table>
         """.format(updated_html2)
 
-    html = {"individual_html": html1, "summary_html": html2}
+
+    html = {"individual_html": html1, "summary_html": html2, 'delta_dict_expected':delta_dict_expected, 'delta_dict_current':delta_dict_current}
 
 
     return jsonify(result=html)

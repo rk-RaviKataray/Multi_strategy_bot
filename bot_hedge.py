@@ -45,7 +45,11 @@ print("master contract downloaded")
 sleep(1.5)
 
 LTP = 0
+global delta_dict_current,delta_dict_expected
 token_dict = UltraDict(recurse=True,create=True)
+delta_dict_current = UltraDict(recurse=True,create=True)
+delta_dict_expected = UltraDict(recurse=True,create=True)
+
 
 '''
 token_dict = {
@@ -63,6 +67,15 @@ token_dict['BANKNIFTY_SPOT'] = {"TOKEN": 0, "LP": 0.0, "POS": "", "PNL": 0.0, "L
                                 "NOE": 0, "BROKERAGE": 0,"QUANTITY":0}
 token_dict['FINNIFTY_SPOT'] = {"TOKEN": 0, "LP": 0.0, "POS": "", "PNL": 0.0, "LAST_ENTRY": 0, "EMA": 0, "FCH": 0,
                                "NOE": 0, "BROKERAGE": 0,"QUANTITY":0}
+
+delta_dict_current['NIFTY'] = {0.3:{'CALL':None, 'PUT':None}, 0.2:{'CALL':None, 'PUT':None}, 0.1:{'CALL':None, 'PUT':None}}
+delta_dict_current['BANKNIFTY'] =   {0.3:{'CALL':None, 'PUT':None}, 0.2:{'CALL':None, 'PUT':None}, 0.1:{'CALL':None, 'PUT':None}}
+delta_dict_current['FINNIFTY'] =   {0.3:{'CALL':None, 'PUT':None}, 0.2:{'CALL':None, 'PUT':None}, 0.1:{'CALL':None, 'PUT':None}}
+
+
+delta_dict_expected['NIFTY'] = {0.3:{'CALL':None, 'PUT':None}, 0.2:{'CALL':None, 'PUT':None}, 0.1:{'CALL':None, 'PUT':None}}
+delta_dict_expected['BANKNIFTY'] =   {0.3:{'CALL':None, 'PUT':None}, 0.2:{'CALL':None, 'PUT':None}, 0.1:{'CALL':None, 'PUT':None}}
+delta_dict_expected['FINNIFTY'] =   {0.3:{'CALL':None, 'PUT':None}, 0.2:{'CALL':None, 'PUT':None}, 0.1:{'CALL':None, 'PUT':None}}
 
 socket_opened = False
 subscribe_flag = False
@@ -574,8 +587,8 @@ class check_entries(threading.Thread):
                                 #print(f'{self.symbol}go_sht')
                                 self.go_short(self.ema, "EMA")
                                 break
-                        #else:
-                        #    break
+                        else:
+                            break
                     
                         break
 
@@ -935,7 +948,10 @@ def stuff():
     global FN_pnl_list_for_dynamic_graph 
     global FN_time_
 
-    global token_dict
+    global token_dict,delta_dict_current,delta_dict_expected
+
+
+
 
 
     # json2html.convert(json=input)
@@ -1150,6 +1166,7 @@ def stuff():
         """.format(updated_html2)
 
     html = {"individual_html": html1, "summary_html": html2}
+    #html = {"individual_html": html1, "summary_html": html2, 'delta_dict_expected':delta_dict_expected, 'delta_dict_current':delta_dict_current}
 
 
     return jsonify(result=html)
@@ -1377,7 +1394,7 @@ if __name__ == '__main__':
         minut = 0
     while True:
         if datetime.datetime.now(pytz.timezone('Asia/Kolkata')).hour >= 9 \
-                and datetime.datetime.now(pytz.timezone('Asia/Kolkata')).minute >= 00 \
+                and datetime.datetime.now(pytz.timezone('Asia/Kolkata')).minute >= 31 \
                 and datetime.datetime.now(pytz.timezone('Asia/Kolkata')).second >= 00:
 
             global nifty_atm,banknifty_atm,finnifty_atm

@@ -1,0 +1,91 @@
+2023-09-05 10:55:13,802 - NIFTY07SEP23P19600 went short at price-73.0, time-10:55:13
+2023-09-05 10:55:13,802 - short entry dict: [0.0, 73.0]
+2023-09-05 10:59:59,170 - NIFTY07SEP23P19600 candle closing price at time 2023-09-05 10:59:59.170247+05:30 is 76.0
+2023-09-05 11:14:59,008 - NIFTY07SEP23P19600 candle closing price at time 2023-09-05 11:14:59.008689+05:30 is 68.6
+2023-09-05 11:29:59,185 - NIFTY07SEP23P19600 candle closing price at time 2023-09-05 11:29:59.185015+05:30 is 70.05
+2023-09-05 11:44:59,244 - NIFTY07SEP23P19600 candle closing price at time 2023-09-05 11:44:59.244516+05:30 is 68.25
+2023-09-05 11:59:59,008 - NIFTY07SEP23P19600 candle closing price at time 2023-09-05 11:59:59.008224+05:30 is 67.25
+2023-09-05 12:14:59,235 - NIFTY07SEP23P19600 candle closing price at time 2023-09-05 12:14:59.235712+05:30 is 74.7
+2023-09-05 12:29:59,137 - NIFTY07SEP23P19600 candle closing price at time 2023-09-05 12:29:59.137217+05:30 is 75.25
+2023-09-05 12:42:03,701 - short entry dict: [0.0, 73.0]
+2023-09-05 12:42:03,702 - short exit dict: [0.0, 92.3]
+2023-09-05 12:42:03,702 - last entry was at : 73.0 and exit at: 92.3
+2023-09-05 12:42:03,702 - short pnl booked until now:-9649.999999999998
+2023-09-05 12:44:59,203 - NIFTY07SEP23P19600 candle closing price at time 2023-09-05 12:44:59.203389+05:30 is 92.25
+2023-09-05 12:59:58,001 - NIFTY07SEP23P19600 went short at price-87.2, time-12:59:58
+2023-09-05 12:59:58,002 - short entry dict: [0.0, 73.0, 87.2]
+2023-09-05 12:59:59,206 - NIFTY07SEP23P19600 candle closing price at time 2023-09-05 12:59:59.206643+05:30 is 87.25
+2023-09-05 13:01:50,910 - short entry dict: [0.0, 73.0, 87.2]
+2023-09-05 13:01:50,910 - short exit dict: [0.0, 92.3, 91.05]
+2023-09-05 13:01:50,911 - last entry was at : 87.2 and exit at: 91.05
+2023-09-05 13:01:50,911 - short pnl booked until now:-11574.999999999996
+2023-09-05 13:14:58,000 - NIFTY07SEP23P19600 went short at price-81.35, time-13:14:58
+2023-09-05 13:14:58,000 - short entry dict: [0.0, 73.0, 87.2, 81.35]
+2023-09-05 13:14:59,204 - NIFTY07SEP23P19600 candle closing price at time 2023-09-05 13:14:59.204393+05:30 is 81.55
+2023-09-05 13:20:43,833 - short entry dict: [0.0, 73.0, 87.2, 81.35]
+2023-09-05 13:20:43,833 - short exit dict: [0.0, 92.3, 91.05, 90.0]
+2023-09-05 13:20:43,833 - last entry was at : 81.35 and exit at: 90.0
+2023-09-05 13:20:43,833 - short pnl booked until now:-15900.0
+2023-09-05 13:29:58,906 - NIFTY07SEP23P19600 went short at price-89.0, time-13:29:58
+2023-09-05 13:29:58,906 - short entry dict: [0.0, 73.0, 87.2, 81.35, 89.0]
+2023-09-05 13:29:59,207 - NIFTY07SEP23P19600 candle closing price at time 2023-09-05 13:29:59.206923+05:30 is 89.0
+2023-09-05 13:44:59,245 - NIFTY07SEP23P19600 candle closing price at time 2023-09-05 13:44:59.245590+05:30 is 82.95
+2023-09-05 13:59:59,101 - NIFTY07SEP23P19600 candle closing price at time 2023-09-05 13:59:59.101735+05:30 is 80.85
+2023-09-05 14:14:59,263 - NIFTY07SEP23P19600 candle closing price at time 2023-09-05 14:14:59.263885+05:30 is 73.65
+2023-09-05 14:29:59,183 - NIFTY07SEP23P19600 candle closing price at time 2023-09-05 14:29:59.183754+05:30 is 65.45
+2023-09-05 14:44:59,153 - NIFTY07SEP23P19600 candle closing price at time 2023-09-05 14:44:59.153854+05:30 is 65.4
+2023-09-05 14:59:59,063 - NIFTY07SEP23P19600 candle closing price at time 2023-09-05 14:59:59.063384+05:30 is 58.05
+2023-09-05 15:14:59,293 - NIFTY07SEP23P19600 candle closing price at time 2023-09-05 15:14:59.293464+05:30 is 59.35
+2023-09-06 10:05:20,561 - NIFTY07SEP23P19600 went short at price-70.95, time-10:5:20
+2023-09-06 10:05:20,562 - short entry dict: [0.0, 70.95]
+2023-09-06 10:08:51,897 - short entry dict: [0.0, 70.95]
+2023-09-06 10:08:51,898 - short exit dict: [0.0, 72.7]
+2023-09-06 10:08:51,898 - last entry was at : 70.95 and exit at: 72.7
+2023-09-06 10:08:51,898 - short pnl booked until now:-875.0
+2023-09-06 10:14:58,001 - NIFTY07SEP23P19600 went short at price-68.8, time-10:14:58
+2023-09-06 10:14:58,001 - short entry dict: [0.0, 70.95, 68.8]
+2023-09-06 10:14:59,216 - NIFTY07SEP23P19600 candle closing price at time 2023-09-06 10:14:59.216735+05:30 is 68.55
+2023-09-06 10:18:10,115 - short entry dict: [0.0, 70.95, 68.8]
+2023-09-06 10:18:10,115 - short exit dict: [0.0, 72.7, 71.4]
+2023-09-06 10:18:10,115 - last entry was at : 68.8 and exit at: 71.4
+2023-09-06 10:18:10,115 - short pnl booked until now:-2175.0000000000045
+2023-09-06 10:29:58,001 - NIFTY07SEP23P19600 went short at price-64.85, time-10:29:58
+2023-09-06 10:29:58,001 - short entry dict: [0.0, 70.95, 68.8, 64.85]
+2023-09-06 10:29:59,205 - NIFTY07SEP23P19600 candle closing price at time 2023-09-06 10:29:59.205545+05:30 is 65.0
+2023-09-06 10:44:59,251 - NIFTY07SEP23P19600 candle closing price at time 2023-09-06 10:44:59.250898+05:30 is 61.65
+2023-09-06 10:59:59,097 - NIFTY07SEP23P19600 candle closing price at time 2023-09-06 10:59:59.097777+05:30 is 67.25
+2023-09-06 11:03:04,712 - short entry dict: [0.0, 70.95, 68.8, 64.85]
+2023-09-06 11:03:04,713 - short exit dict: [0.0, 72.7, 71.4, 71.9]
+2023-09-06 11:03:04,713 - last entry was at : 64.85 and exit at: 71.9
+2023-09-06 11:03:04,713 - short pnl booked until now:-5700.00000000001
+2023-09-06 11:14:58,001 - NIFTY07SEP23P19600 went short at price-65.0, time-11:14:58
+2023-09-06 11:14:58,002 - short entry dict: [0.0, 70.95, 68.8, 64.85, 65.0]
+2023-09-06 11:14:59,206 - NIFTY07SEP23P19600 candle closing price at time 2023-09-06 11:14:59.206623+05:30 is 64.8
+2023-09-06 11:22:51,564 - short entry dict: [0.0, 70.95, 68.8, 64.85, 65.0]
+2023-09-06 11:22:51,565 - short exit dict: [0.0, 72.7, 71.4, 71.9, 69.9]
+2023-09-06 11:22:51,565 - last entry was at : 65.0 and exit at: 69.9
+2023-09-06 11:22:51,565 - short pnl booked until now:-8150.000000000013
+2023-09-06 11:29:58,001 - NIFTY07SEP23P19600 went short at price-63.9, time-11:29:58
+2023-09-06 11:29:58,001 - short entry dict: [0.0, 70.95, 68.8, 64.85, 65.0, 63.9]
+2023-09-06 11:29:59,205 - NIFTY07SEP23P19600 candle closing price at time 2023-09-06 11:29:59.205683+05:30 is 63.7
+2023-09-06 11:32:28,102 - short entry dict: [0.0, 70.95, 68.8, 64.85, 65.0, 63.9]
+2023-09-06 11:32:28,103 - short exit dict: [0.0, 72.7, 71.4, 71.9, 69.9, 69.3]
+2023-09-06 11:32:28,103 - last entry was at : 63.9 and exit at: 69.3
+2023-09-06 11:32:28,103 - short pnl booked until now:-10850.000000000011
+2023-09-06 11:44:59,206 - NIFTY07SEP23P19600 candle closing price at time 2023-09-06 11:44:59.206301+05:30 is 79.85
+2023-09-06 11:59:59,295 - NIFTY07SEP23P19600 candle closing price at time 2023-09-06 11:59:59.295111+05:30 is 77.8
+2023-09-06 12:14:59,205 - NIFTY07SEP23P19600 candle closing price at time 2023-09-06 12:14:59.205016+05:30 is 70.7
+2023-09-06 12:29:59,206 - NIFTY07SEP23P19600 candle closing price at time 2023-09-06 12:29:59.206650+05:30 is 74.65
+2023-09-06 12:44:59,262 - NIFTY07SEP23P19600 candle closing price at time 2023-09-06 12:44:59.262719+05:30 is 110.35
+2023-09-06 12:59:59,166 - NIFTY07SEP23P19600 candle closing price at time 2023-09-06 12:59:59.166650+05:30 is 113.9
+2023-09-06 13:14:59,207 - NIFTY07SEP23P19600 candle closing price at time 2023-09-06 13:14:59.207569+05:30 is 111.75
+2023-09-06 13:29:59,183 - NIFTY07SEP23P19600 candle closing price at time 2023-09-06 13:29:59.183304+05:30 is 117.95
+2023-09-06 13:44:59,115 - NIFTY07SEP23P19600 candle closing price at time 2023-09-06 13:44:59.115117+05:30 is 101.8
+2023-09-06 13:59:59,179 - NIFTY07SEP23P19600 candle closing price at time 2023-09-06 13:59:59.179752+05:30 is 110.05
+2023-09-06 14:14:59,060 - NIFTY07SEP23P19600 candle closing price at time 2023-09-06 14:14:59.060775+05:30 is 105.8
+2023-09-06 14:29:58,006 - NIFTY07SEP23P19600 went short at price-83.45, time-14:29:58
+2023-09-06 14:29:58,006 - short entry dict: [0.0, 70.95, 68.8, 64.85, 65.0, 63.9, 83.45]
+2023-09-06 14:29:59,211 - NIFTY07SEP23P19600 candle closing price at time 2023-09-06 14:29:59.211842+05:30 is 82.9
+2023-09-06 14:44:59,127 - NIFTY07SEP23P19600 candle closing price at time 2023-09-06 14:44:59.127034+05:30 is 71.9
+2023-09-06 14:59:59,058 - NIFTY07SEP23P19600 candle closing price at time 2023-09-06 14:59:59.057962+05:30 is 72.3
+2023-09-06 15:14:59,125 - NIFTY07SEP23P19600 candle closing price at time 2023-09-06 15:14:59.125796+05:30 is 36.5

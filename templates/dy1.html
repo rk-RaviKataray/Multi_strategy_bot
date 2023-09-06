@@ -32,6 +32,13 @@ var intervalID = setInterval(update_values,1000);
         $.getJSON('https://white-analyst-jjajl.ineuron.app:5000/_stuff',
                
       function(data) {
+       
+
+        //$('#delta_dict_expected').text(JSON.stringify(data.result['delta_dict_expected']));
+        //$('#delta_dict_current').text(JSON.stringify(data.result['delta_dict_current']));
+
+        //$('#delta_dict_expected').html(data.result['delta_dict_expected']);
+        //$('#delta_dict_actual').html(data.result['delta_dict_actual']);
 
         $('#summary').html(data.result['summary_html']);
         $('#result').html(data.result['individual_html']);
@@ -195,6 +202,9 @@ function displayISTTime() {
 <body onload="update_values();">
 <h1><center>DASHBOARD(15Min)</center></h1> 
 <p>
+    <span id="delta_dict_expected">?</span>
+    <span id="delta_dict_current">?</span>
+
     <span id="summary">?</span>
     <h4 ><center>INDIVIDUAL INSTRUMENT DATA </center></h4>  
 

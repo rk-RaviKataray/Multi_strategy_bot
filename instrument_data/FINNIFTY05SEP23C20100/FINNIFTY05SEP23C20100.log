@@ -1,0 +1,8 @@
+2023-09-04 09:31:11,059 - FINNIFTY05SEP23C20100 went long at price-2.45, time-9:31:11
+2023-09-04 09:31:11,060 - long entry dict:[0.0, 2.45]
+2023-09-04 09:31:11,060 - long exit dict:[0.0]
+2023-09-04 09:31:11,061 - HEDGE-FINNIFTY05SEP23C20100 went long at price-2.45, time-9:31:11
+2023-09-05 10:55:12,797 - FINNIFTY05SEP23C20100 went long at price-0.7, time-10:55:12
+2023-09-05 10:55:12,797 - long entry dict:[0.0, 0.7]
+2023-09-05 10:55:12,798 - long exit dict:[0.0]
+2023-09-05 10:55:12,798 - HEDGE-FINNIFTY05SEP23C20100 went long at price-0.7, time-10:55:12

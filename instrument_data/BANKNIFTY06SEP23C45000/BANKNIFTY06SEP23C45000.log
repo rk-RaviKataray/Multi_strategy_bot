@@ -1,0 +1,109 @@
+2023-09-04 09:31:12,091 - BANKNIFTY06SEP23C45000 went short at price-47.9, time-9:31:12
+2023-09-04 09:31:12,092 - short entry dict: [0.0, 47.9]
+2023-09-04 09:35:38,702 - short entry dict: [0.0, 47.9]
+2023-09-04 09:35:38,702 - short exit dict: [0.0, 40.35]
+2023-09-04 09:35:38,702 - last entry was at : 47.9 and exit at: 40.35
+2023-09-04 09:35:38,702 - short pnl booked until now:2264.999999999999
+2023-09-04 09:44:58,003 - BANKNIFTY06SEP23C45000 went short at price-32.45, time-9:44:58
+2023-09-04 09:44:58,003 - short entry dict: [0.0, 47.9, 32.45]
+2023-09-04 09:44:59,208 - BANKNIFTY06SEP23C45000 candle closing price at time 2023-09-04 09:44:59.208570+05:30 is 32.35
+2023-09-04 09:47:36,701 - short entry dict: [0.0, 47.9, 32.45]
+2023-09-04 09:47:36,707 - short exit dict: [0.0, 40.35, 40.4]
+2023-09-04 09:47:36,712 - last entry was at : 32.45 and exit at: 40.4
+2023-09-04 09:47:36,717 - short pnl booked until now:-119.99999999999955
+2023-09-04 09:59:59,206 - BANKNIFTY06SEP23C45000 candle closing price at time 2023-09-04 09:59:59.206160+05:30 is 41.35
+2023-09-04 10:14:58,003 - BANKNIFTY06SEP23C45000 went short at price-34.65, time-10:14:58
+2023-09-04 10:14:58,003 - short entry dict: [0.0, 47.9, 32.45, 34.65]
+2023-09-04 10:14:59,208 - BANKNIFTY06SEP23C45000 candle closing price at time 2023-09-04 10:14:59.208649+05:30 is 34.45
+2023-09-04 10:25:27,116 - short entry dict: [0.0, 47.9, 32.45, 34.65]
+2023-09-04 10:25:27,121 - short exit dict: [0.0, 40.35, 40.4, 38.65]
+2023-09-04 10:25:27,127 - last entry was at : 34.65 and exit at: 38.65
+2023-09-04 10:25:27,204 - short pnl booked until now:-1319.9999999999995
+2023-09-04 10:29:58,001 - BANKNIFTY06SEP23C45000 went short at price-34.55, time-10:29:58
+2023-09-04 10:29:58,002 - short entry dict: [0.0, 47.9, 32.45, 34.65, 34.55]
+2023-09-04 10:29:59,208 - BANKNIFTY06SEP23C45000 candle closing price at time 2023-09-04 10:29:59.207976+05:30 is 34.4
+2023-09-04 10:44:59,247 - BANKNIFTY06SEP23C45000 candle closing price at time 2023-09-04 10:44:59.247140+05:30 is 29.15
+2023-09-04 10:59:59,161 - BANKNIFTY06SEP23C45000 candle closing price at time 2023-09-04 10:59:59.161851+05:30 is 31.7
+2023-09-04 11:02:57,464 - short entry dict: [0.0, 47.9, 32.45, 34.65, 34.55]
+2023-09-04 11:02:57,469 - short exit dict: [0.0, 40.35, 40.4, 38.65, 37.9]
+2023-09-04 11:02:57,474 - last entry was at : 34.55 and exit at: 37.9
+2023-09-04 11:02:57,480 - short pnl booked until now:-2325.0
+2023-09-04 11:14:59,205 - BANKNIFTY06SEP23C45000 candle closing price at time 2023-09-04 11:14:59.205434+05:30 is 38.8
+2023-09-04 11:29:59,205 - BANKNIFTY06SEP23C45000 candle closing price at time 2023-09-04 11:29:59.205581+05:30 is 38.0
+2023-09-04 11:44:58,002 - BANKNIFTY06SEP23C45000 went short at price-37.1, time-11:44:58
+2023-09-04 11:44:58,003 - short entry dict: [0.0, 47.9, 32.45, 34.65, 34.55, 37.1]
+2023-09-04 11:44:59,206 - BANKNIFTY06SEP23C45000 candle closing price at time 2023-09-04 11:44:59.206583+05:30 is 36.25
+2023-09-04 11:45:46,643 - short entry dict: [0.0, 47.9, 32.45, 34.65, 34.55, 37.1]
+2023-09-04 11:45:46,643 - short exit dict: [0.0, 40.35, 40.4, 38.65, 37.9, 37.9]
+2023-09-04 11:45:46,643 - last entry was at : 37.1 and exit at: 37.9
+2023-09-04 11:45:46,643 - short pnl booked until now:-2564.999999999999
+2023-09-04 11:59:58,001 - BANKNIFTY06SEP23C45000 went short at price-36.3, time-11:59:58
+2023-09-04 11:59:58,002 - short entry dict: [0.0, 47.9, 32.45, 34.65, 34.55, 37.1, 36.3]
+2023-09-04 11:59:59,206 - BANKNIFTY06SEP23C45000 candle closing price at time 2023-09-04 11:59:59.206244+05:30 is 36.3
+2023-09-04 12:00:17,754 - short entry dict: [0.0, 47.9, 32.45, 34.65, 34.55, 37.1, 36.3]
+2023-09-04 12:00:17,754 - short exit dict: [0.0, 40.35, 40.4, 38.65, 37.9, 37.9, 37.3]
+2023-09-04 12:00:17,754 - last entry was at : 36.3 and exit at: 37.3
+2023-09-04 12:00:17,754 - short pnl booked until now:-2864.999999999999
+2023-09-04 12:14:58,002 - BANKNIFTY06SEP23C45000 went short at price-34.2, time-12:14:58
+2023-09-04 12:14:58,003 - short entry dict: [0.0, 47.9, 32.45, 34.65, 34.55, 37.1, 36.3, 34.2]
+2023-09-04 12:14:59,206 - BANKNIFTY06SEP23C45000 candle closing price at time 2023-09-04 12:14:59.206428+05:30 is 34.15
+2023-09-04 12:23:46,050 - short entry dict: [0.0, 47.9, 32.45, 34.65, 34.55, 37.1, 36.3, 34.2]
+2023-09-04 12:23:46,055 - short exit dict: [0.0, 40.35, 40.4, 38.65, 37.9, 37.9, 37.3, 36.8]
+2023-09-04 12:23:46,060 - last entry was at : 34.2 and exit at: 36.8
+2023-09-04 12:23:46,065 - short pnl booked until now:-3644.9999999999973
+2023-09-04 12:29:59,205 - BANKNIFTY06SEP23C45000 candle closing price at time 2023-09-04 12:29:59.205090+05:30 is 39.1
+2023-09-04 12:44:59,207 - BANKNIFTY06SEP23C45000 candle closing price at time 2023-09-04 12:44:59.207816+05:30 is 40.05
+2023-09-04 12:59:59,207 - BANKNIFTY06SEP23C45000 candle closing price at time 2023-09-04 12:59:59.207429+05:30 is 37.7
+2023-09-04 13:14:59,212 - BANKNIFTY06SEP23C45000 candle closing price at time 2023-09-04 13:14:59.212476+05:30 is 40.2
+2023-09-04 13:29:59,115 - BANKNIFTY06SEP23C45000 candle closing price at time 2023-09-04 13:29:59.115436+05:30 is 40.65
+2023-09-04 13:44:58,010 - BANKNIFTY06SEP23C45000 went short at price-35.85, time-13:44:58
+2023-09-04 13:44:58,010 - short entry dict: [0.0, 47.9, 32.45, 34.65, 34.55, 37.1, 36.3, 34.2, 35.85]
+2023-09-04 13:44:59,214 - BANKNIFTY06SEP23C45000 candle closing price at time 2023-09-04 13:44:59.214801+05:30 is 35.9
+2023-09-04 13:45:15,365 - short entry dict: [0.0, 47.9, 32.45, 34.65, 34.55, 37.1, 36.3, 34.2, 35.85]
+2023-09-04 13:45:15,366 - short exit dict: [0.0, 40.35, 40.4, 38.65, 37.9, 37.9, 37.3, 36.8, 38.4]
+2023-09-04 13:45:15,366 - last entry was at : 35.85 and exit at: 38.4
+2023-09-04 13:45:15,366 - short pnl booked until now:-4409.999999999996
+2023-09-04 13:59:58,010 - BANKNIFTY06SEP23C45000 went short at price-30.4, time-13:59:58
+2023-09-04 13:59:58,010 - short entry dict: [0.0, 47.9, 32.45, 34.65, 34.55, 37.1, 36.3, 34.2, 35.85, 30.4]
+2023-09-04 13:59:59,223 - BANKNIFTY06SEP23C45000 candle closing price at time 2023-09-04 13:59:59.223024+05:30 is 30.5
+2023-09-04 14:14:59,196 - BANKNIFTY06SEP23C45000 candle closing price at time 2023-09-04 14:14:59.195995+05:30 is 31.2
+2023-09-04 14:29:33,137 - short entry dict: [0.0, 47.9, 32.45, 34.65, 34.55, 37.1, 36.3, 34.2, 35.85, 30.4]
+2023-09-04 14:29:33,138 - short exit dict: [0.0, 40.35, 40.4, 38.65, 37.9, 37.9, 37.3, 36.8, 38.4, 36.95]
+2023-09-04 14:29:33,138 - last entry was at : 30.4 and exit at: 36.95
+2023-09-04 14:29:33,138 - short pnl booked until now:-6374.999999999998
+2023-09-04 14:29:58,008 - BANKNIFTY06SEP23C45000 went short at price-36.25, time-14:29:58
+2023-09-04 14:29:58,009 - short entry dict: [0.0, 47.9, 32.45, 34.65, 34.55, 37.1, 36.3, 34.2, 35.85, 30.4, 36.25]
+2023-09-04 14:29:59,214 - BANKNIFTY06SEP23C45000 candle closing price at time 2023-09-04 14:29:59.213977+05:30 is 36.4
+2023-09-04 14:30:14,738 - short entry dict: [0.0, 47.9, 32.45, 34.65, 34.55, 37.1, 36.3, 34.2, 35.85, 30.4, 36.25]
+2023-09-04 14:30:14,738 - short exit dict: [0.0, 40.35, 40.4, 38.65, 37.9, 37.9, 37.3, 36.8, 38.4, 36.95, 37.55]
+2023-09-04 14:30:14,738 - last entry was at : 36.25 and exit at: 37.55
+2023-09-04 14:30:14,738 - short pnl booked until now:-6764.999999999997
+2023-09-04 14:44:59,206 - BANKNIFTY06SEP23C45000 candle closing price at time 2023-09-04 14:44:59.206238+05:30 is 38.2
+2023-09-04 14:59:58,001 - BANKNIFTY06SEP23C45000 went short at price-35.35, time-14:59:58
+2023-09-04 14:59:58,002 - short entry dict: [0.0, 47.9, 32.45, 34.65, 34.55, 37.1, 36.3, 34.2, 35.85, 30.4, 36.25, 35.35]
+2023-09-04 14:59:59,209 - BANKNIFTY06SEP23C45000 candle closing price at time 2023-09-04 14:59:59.209044+05:30 is 35.5
+2023-09-04 15:14:59,183 - BANKNIFTY06SEP23C45000 candle closing price at time 2023-09-04 15:14:59.183679+05:30 is 33.35
+2023-09-05 10:55:13,967 - BANKNIFTY06SEP23C45000 went short at price-21.7, time-10:55:13
+2023-09-05 10:55:13,968 - short entry dict: [0.0, 21.7]
+2023-09-05 10:59:59,004 - BANKNIFTY06SEP23C45000 candle closing price at time 2023-09-05 10:59:59.004598+05:30 is 20.3
+2023-09-05 11:14:59,245 - BANKNIFTY06SEP23C45000 candle closing price at time 2023-09-05 11:14:59.245385+05:30 is 19.05
+2023-09-05 11:29:59,116 - BANKNIFTY06SEP23C45000 candle closing price at time 2023-09-05 11:29:59.116235+05:30 is 17.7
+2023-09-05 11:44:59,095 - BANKNIFTY06SEP23C45000 candle closing price at time 2023-09-05 11:44:59.095440+05:30 is 17.6
+2023-09-05 11:59:59,252 - BANKNIFTY06SEP23C45000 candle closing price at time 2023-09-05 11:59:59.252261+05:30 is 19.7
+2023-09-05 12:14:59,158 - BANKNIFTY06SEP23C45000 candle closing price at time 2023-09-05 12:14:59.158483+05:30 is 15.2
+2023-09-05 12:29:59,214 - BANKNIFTY06SEP23C45000 candle closing price at time 2023-09-05 12:29:59.214150+05:30 is 15.05
+2023-09-05 12:44:59,246 - BANKNIFTY06SEP23C45000 candle closing price at time 2023-09-05 12:44:59.246337+05:30 is 12.95
+2023-09-05 12:59:59,155 - BANKNIFTY06SEP23C45000 candle closing price at time 2023-09-05 12:59:59.155174+05:30 is 13.7
+2023-09-05 13:14:59,007 - BANKNIFTY06SEP23C45000 candle closing price at time 2023-09-05 13:14:59.007613+05:30 is 14.85
+2023-09-05 13:29:59,056 - BANKNIFTY06SEP23C45000 candle closing price at time 2023-09-05 13:29:59.056238+05:30 is 11.7
+2023-09-05 13:44:59,059 - BANKNIFTY06SEP23C45000 candle closing price at time 2023-09-05 13:44:59.059625+05:30 is 11.2
+2023-09-05 13:59:59,290 - BANKNIFTY06SEP23C45000 candle closing price at time 2023-09-05 13:59:59.290502+05:30 is 11.55
+2023-09-05 14:14:59,022 - BANKNIFTY06SEP23C45000 candle closing price at time 2023-09-05 14:14:59.022214+05:30 is 12.0
+2023-09-05 14:29:59,024 - BANKNIFTY06SEP23C45000 candle closing price at time 2023-09-05 14:29:59.024743+05:30 is 13.15
+2023-09-05 14:44:59,266 - BANKNIFTY06SEP23C45000 candle closing price at time 2023-09-05 14:44:59.266152+05:30 is 12.0
+2023-09-05 14:59:59,168 - BANKNIFTY06SEP23C45000 candle closing price at time 2023-09-05 14:59:59.168283+05:30 is 11.1
+2023-09-05 15:14:59,196 - BANKNIFTY06SEP23C45000 candle closing price at time 2023-09-05 15:14:59.196069+05:30 is 9.25
+2023-09-06 10:05:19,085 - BANKNIFTY06SEP23C45000 went long at price-3.5, time-10:5:19
+2023-09-06 10:05:19,085 - long entry dict:[0.0, 3.5]
+2023-09-06 10:05:19,085 - long exit dict:[0.0]
+2023-09-06 10:05:19,086 - HEDGE-BANKNIFTY06SEP23C45000 went long at price-3.5, time-10:5:19

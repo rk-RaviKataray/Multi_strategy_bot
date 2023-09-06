@@ -1,39 +1,36 @@
-import threading
-import time
+from UltraDict import UltraDict
 
-# Define the base class
-class Vehicle(threading.Thread):
-    def __init__(self, name):
-        super(Vehicle, self).__init__(name=name)  # Pass the name to the Thread constructor
 
-    def run(self):
-        while True:
-            print(f'running thread...{self.name}')
-            time.sleep(2)
+def update_delta_dict_expected(base_symbol, target_delta):
+ 
+        global delta_dict_expected
 
-    def change_name(self, new_name):
-        self.name = new_name  # Modify the name attribute of the Thread object
+        closest_key = None
+        closest_difference = None
 
-    def stop_engine(self):
-        print(f"{self.name} engine stopped.")
+        for key, value in token_dict.items():
+            if key.startswith(base_symbol[0]):
+                option_type = 'CALL' if key[-6] == 'C' else 'PUT'
 
-# Define the derived class inheriting from Vehicle
-class Car(Vehicle):
-    def __init__(self, speed):
-        self.speed = speed
-        super(Car, self).__init__('')  # Pass an empty name to the base class constructor
+                delta = value['DELTA']
+                difference = abs(delta - target_delta)
 
-    def race(self):
-        print('in race changing name..')
-        self.change_name('qwerty')  # Call the parent class method to modify the name
-        obj.name = 'qwertyui'
+                if closest_key is None or difference < closest_difference:
+                    closest_key = key
+                    closest_difference = difference
+        delta_dict_expected[base_symbol][abs(target_delta)][option_type] = closest_key    
 
-# Create a Vehicle object
-obj = Vehicle('ravi')
-obj.start()
+        for i in range(len(check_entries.instances)):
 
-time.sleep(5)
+            if check_entries.instances[i].symbol == closest_key:
+                delta_dict_expected[base_symbol][abs(target_delta)][option_type] = check_entries.instances[i]    
+                return    
 
-# Create a Car object
-car1 = Car(60)
-car1.race()
+        obj = check_entries(closest_key , quantity=quantity_dic[base_symbol],is_hedge=False)
+        delta_dict_expected[base_symbol][abs(target_delta)][option_type] = obj
+        obj.start()
+
+delta_dict_expected = UltraDict(recurse=True,create=True)
+delta_dict_expected['NIFTY'] = {0.3:{'CALL':None, 'PUT':None}, 0.2:{'CALL':None, 'PUT':None}, 0.1:{'CALL':None, 'PUT':None}}
+delta_dict_expected['BANKNIFTY'] =   {0.3:{'CALL':None, 'PUT':None}, 0.2:{'CALL':None, 'PUT':None}, 0.1:{'CALL':None, 'PUT':None}}
+delta_dict_expected['FINNIFTY'] =   {0.3:{'CALL':None, 'PUT':None}, 0.2:{'CALL':None, 'PUT':None}, 0.1:{'CALL':None, 'PUT':None}}

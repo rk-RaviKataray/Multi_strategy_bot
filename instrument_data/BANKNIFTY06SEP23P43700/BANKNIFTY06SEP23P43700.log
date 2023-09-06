@@ -1,0 +1,8 @@
+2023-09-04 09:31:11,057 - BANKNIFTY06SEP23P43700 went long at price-24.5, time-9:31:11
+2023-09-04 09:31:11,057 - long entry dict:[0.0, 24.5]
+2023-09-04 09:31:11,057 - long exit dict:[0.0]
+2023-09-04 09:31:11,058 - HEDGE-BANKNIFTY06SEP23P43700 went long at price-24.5, time-9:31:11
+2023-09-05 10:55:12,791 - BANKNIFTY06SEP23P43700 went long at price-11.05, time-10:55:12
+2023-09-05 10:55:12,792 - long entry dict:[0.0, 11.05]
+2023-09-05 10:55:12,792 - long exit dict:[0.0]
+2023-09-05 10:55:12,792 - HEDGE-BANKNIFTY06SEP23P43700 went long at price-11.05, time-10:55:12
