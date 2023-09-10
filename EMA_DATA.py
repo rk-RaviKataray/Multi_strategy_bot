@@ -19,6 +19,11 @@ def is_current_date_greater_than_latest_expiry(string_input_with_date):
 
 @retry(stop_max_attempt_number=1, wait_fixed=10000)
 def gen_data():
+
+    date_ = datetime.datetime.now(pytz.timezone('Asia/Kolkata'))
+    today = date_.strftime('%A')
+    
+
     # User Credential
     user_id = '771791'
     api_key = 'jOf1uqDV2objI4Obj33QuoTN4Iz7qXD0mW5X0WgupaH8k9NvWV0hqifsdN6Rf1vmEmGEbHJsLq448Kkt6tU7u5qocJyOTQOYJAxxcq1dyqHzs1br5IGFnpsQrPUATctt'
@@ -30,17 +35,20 @@ def gen_data():
     print(alice.get_session_id())
     print("******************************  CONNECTION ESTABLISHED WITH API  *******************************")
     alice.get_contract_master("NFO")
-    sleep(5)
+    sleep(2)
+    alice.get_contract_master("BFO") 
+    sleep(2)
     #pathlib.Path('/home/ravik/.config/JetBrains/PyCharmCE2022.2/scratches/NFO.csv').rename('/home/ravik/.config/JetBrains/PyCharmCE2022.2/scratches/Dynamic Update/NFO.csv')
 
 
-    print('STEP-1: NFO DATA DOWNLOAD COMPLETE')
+    print('STEP-1: NFO/BFO DATA DOWNLOAD COMPLETE')
 
     #print(alice.get_instrument_by_token('INDICES', 26000))
 
     nifty = alice.get_scrip_info(alice.get_instrument_by_token('INDICES', 26000))
     bank_nifty = alice.get_scrip_info(alice.get_instrument_by_token('INDICES', 26009))
     fin_nifty = alice.get_scrip_info(alice.get_instrument_by_token('INDICES', 26037))
+    sensex = alice.get_scrip_info(alice.get_instrument_by_token('INDICES', 1)) 
 
 
 
@@ -50,22 +58,34 @@ def gen_data():
     nifty_close_atm = round(float(nifty['PrvClose']), -2)
     bank_nifty_close_atm = round(float(bank_nifty['PrvClose']), -2)
     fin_nifty_close_atm = round(float(fin_nifty['PrvClose']), -2)
+    sensex_close_atm = round(float(sensex['PrvClose']), -2)
 
 
 
-    df = pd.read_csv('NFO.csv')
+
+    df_nse = pd.read_csv('NFO.csv')
+    
+    df_bse = pd.read_csv('BFO.csv')
+    
+
     expiry_nifty_df = df[df['Symbol'] == 'NIFTY']
     expiry_bnnifty_df = df[df['Symbol'] == 'BANKNIFTY']
     expiry_finnifty_df = df[df['Symbol'] == 'FINNIFTY']
+
+    expiry_sensex_df = df[df['Symbol'] == 'SENSEX']
 
 
     expiry_nifty = expiry_nifty_df['Expiry Date'].sort_values().drop_duplicates().reset_index(drop=True)
     expiry_banknifty = expiry_bnnifty_df['Expiry Date'].sort_values().drop_duplicates().reset_index(drop=True)
     expiry_finnifty = expiry_finnifty_df['Expiry Date'].sort_values().drop_duplicates().reset_index(drop=True)
+    expiry_sensex = expiry_sensex_df['Expiry Date'].sort_values().drop_duplicates().reset_index(drop=True)
+
+
 
     nifty_expiry = expiry_nifty[1] if is_current_date_greater_than_latest_expiry(expiry_nifty[0]) else expiry_nifty[0]
     banknifty_expiry = expiry_banknifty[1] if is_current_date_greater_than_latest_expiry(expiry_banknifty[0]) else expiry_banknifty[0]
     finnifty_expiry = expiry_finnifty[1] if is_current_date_greater_than_latest_expiry(expiry_finnifty[0]) else expiry_finnifty[0]
+    sensex_expiry = expiry_sensex[1] if is_current_date_greater_than_latest_expiry(expiry_sensex[0]) else expiry_sensex[0]
 
 
     # nifty_expiry = expiry_nifty[0] if str(datetime.datetime.now(pytz.timezone('Asia/Kolkata')).date()) == str(
@@ -79,6 +99,7 @@ def gen_data():
     print("NIFTY : {}\n".format(nifty_expiry))
     print("BANKNIFTY : {}\n".format(banknifty_expiry))
     print("FINNIFTY : {}\n".format(finnifty_expiry))
+    print("SENSEX : {}\n".format(sensex_expiry))
 
     dic = {}
 
@@ -133,6 +154,8 @@ def gen_data():
     expiry_format_banknifty = get_expiry_date_trading_symbol(str(banknifty_expiry))
     expiry_format_nifty = get_expiry_date_trading_symbol(str(nifty_expiry))
     expiry_format_finnifty = get_expiry_date_trading_symbol(str(finnifty_expiry))
+    expiry_format_sensex = get_expiry_date_trading_symbol(str(sensex_expiry))
+
 
     print("STEP-3: GENERATING DATA FOR BANKNIFTY........")
     print("NON TRADABLE INSTRUMENTS BANKNIFTY:")
@@ -152,13 +175,24 @@ def gen_data():
         create_dic("NIFTY", nifty_expiry, nifty_close_atm + (x * 100), "PE", expiry_format_nifty)
     sleep(65)
 
-    print("STEP-5: GENERATING DATA FOR FINNIFTY........")
-    print("NON TRADABLE INSTRUMENTS FINNIFTY:")
+    if today == 'Friday':
+
+        print("STEP-5: GENERATING DATA FOR SENSEX........")
+        print("NON TRADABLE INSTRUMENTS SENSEX:")
 
 
-    for x in range(-10, 11):
-        create_dic("FINNIFTY", finnifty_expiry, fin_nifty_close_atm + (x * 100), "CE", expiry_format_finnifty)
-        create_dic("FINNIFTY", finnifty_expiry, fin_nifty_close_atm + (x * 100), "PE", expiry_format_finnifty)
+        for x in range(-20, 20):
+            create_dic("SENSEX", sensex_expiry, sensex_close_atm + (x * 100), "CE", expiry_format_sensex)
+            create_dic("SENSEX", sensex_expiry, sensex_close_atm + (x * 100), "PE", expiry_format_sensex)
+
+    else:
+        print("STEP-5: GENERATING DATA FOR FINNIFTY........")
+        print("NON TRADABLE INSTRUMENTS FINNIFTY:")
+
+
+        for x in range(-10, 11):
+            create_dic("FINNIFTY", finnifty_expiry, fin_nifty_close_atm + (x * 100), "CE", expiry_format_finnifty)
+            create_dic("FINNIFTY", finnifty_expiry, fin_nifty_close_atm + (x * 100), "PE", expiry_format_finnifty)
 
     if os.path.exists("data_ema.json"):
         os.remove("data_ema.json")
@@ -171,3 +205,4 @@ def gen_data():
 
 
 gen_data()
+

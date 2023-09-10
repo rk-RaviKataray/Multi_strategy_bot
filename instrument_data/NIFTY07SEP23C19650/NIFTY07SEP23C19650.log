@@ -10,3 +10,7 @@
 2023-09-06 10:05:19,053 - long entry dict:[0.0, 14.4]
 2023-09-06 10:05:19,053 - long exit dict:[0.0]
 2023-09-06 10:05:19,053 - HEDGE-NIFTY07SEP23C19650 went long at price-14.4, time-10:5:19
+2023-09-07 09:31:11,781 - NIFTY07SEP23C19650 went long at price-3.65, time-9:31:11
+2023-09-07 09:31:11,782 - long entry dict:[0.0, 3.65]
+2023-09-07 09:31:11,783 - long exit dict:[0.0]
+2023-09-07 09:31:11,783 - HEDGE-NIFTY07SEP23C19650 went long at price-3.65, time-9:31:11

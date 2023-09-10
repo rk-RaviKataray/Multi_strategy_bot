@@ -1,2 +1,6 @@
 2023-09-05 10:55:12,767 - HEDGE-NIFTY07SEP23C20100 went long at price-0, time-10:55:12
 2023-09-06 10:05:19,022 - HEDGE-NIFTY07SEP23C20100 went long at price-0, time-10:5:19
+2023-09-07 09:31:11,782 - NIFTY07SEP23C20100 went long at price-0.4, time-9:31:11
+2023-09-07 09:31:11,783 - long entry dict:[0.0, 0.4]
+2023-09-07 09:31:11,785 - long exit dict:[0.0]
+2023-09-07 09:31:11,787 - HEDGE-NIFTY07SEP23C20100 went long at price-0.4, time-9:31:11

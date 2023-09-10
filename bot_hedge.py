@@ -146,7 +146,7 @@ def socket():
         global socket_opened
         socket_opened = True
         if subscribe_flag:  # This is used to resubscribe the script when reconnect the socket.
-            alice.subscribe(get_subscribe_list(banknifty_atm,nifty_atm,finnifty_atm,expiry_banknifty[1],expiry_nifty[1],expiry_finnifty[0]))
+            alice.subscribe(get_subscribe_list(banknifty_atm,nifty_atm,finnifty_atm,expiry_banknifty,expiry_nifty,expiry_finnifty))
 
     def socket_close():  # On Socket close this callback function will trigger
         global socket_opened, LTP
@@ -311,8 +311,8 @@ class check_entries(threading.Thread):
             token_dict[self.symbol]["QUANTITY"] = self.quantity
 
 
-            # while True:
-            #     sleep(1)
+            while True:
+                sleep(1)
 
 
             if self.is_hedge:
@@ -346,6 +346,8 @@ class check_entries(threading.Thread):
             self.first_candle_high = max(df_.head(15)['high'])
             token_dict[self.symbol]["FCH"] = self.first_candle_high
             self.closing_price.append(df_['close'][14])
+            self.ema = self.get_ema_25()
+            token_dict[self.symbol]["EMA"] = self.ema
             while True:
                 while start_time < \
                         (datetime.datetime.now(pytz.timezone('Asia/Kolkata')).hour * 60 * 60 + datetime.datetime.now(
@@ -363,9 +365,10 @@ class check_entries(threading.Thread):
                     if (datetime.datetime.now(pytz.timezone('Asia/Kolkata')).minute % 15) == 14 and datetime.datetime.now(
                             pytz.timezone('Asia/Kolkata')).second == 59:
                         self.closing_price.append(float(token_dict[self.symbol]["LP"]))
-                        self.logger.debug('{} candle closing price at time {} is {}'.format(self.symbol, datetime.datetime.now(
-                            pytz.timezone('Asia/Kolkata')), float(token_dict[self.symbol]["LP"])))
+                        self.logger.debug('{} candle closing price: {}'.format(self.symbol, float(token_dict[self.symbol]["LP"])))
                         sleep(1)
+                        self.ema = self.get_ema_25()
+                        token_dict[self.symbol]["EMA"] = self.ema
                     
                     if datetime.datetime.now(pytz.timezone('Asia/Kolkata')).second == 00:
                         
@@ -382,8 +385,7 @@ class check_entries(threading.Thread):
                         os.fsync(self.candle_data_file)
                         sleep(1)
 
-                    self.ema = self.get_ema_25()
-                    token_dict[self.symbol]["EMA"] = self.ema
+                    
 
                     token_dict[self.symbol]["BROKERAGE"] = self.short_brokerage + self.long_brokerage
 
@@ -509,7 +511,7 @@ class check_entries(threading.Thread):
                                 if self.temp_closing_candle_variable < self.first_candle_high:
                                     #print(f'{self.symbol}in self.temp_closing_candle_variable < self.first_candle_high:')
                                     #print(f'{self.symbol}calling go_sht')
-                                    self.go_short(self.first_candle_high, "FCH")
+                                    self.go_short(self.first_candle_high , "FCH")
                                     break
                             '''
                             elif float(token_dict[self.symbol]["LP"]) < self.first_candle_high and self.lng == True:
@@ -630,16 +632,7 @@ class check_entries(threading.Thread):
                 token_dict[self.symbol]["POS"] = "LONG"
                 # self.sht = False
                 self.lng_counter = 0
-                self.logger.debug('{} went long at price-{}, time-{}:{}:{}'.format(self.symbol,
-                                                                       self.price,
-                                                                       datetime.datetime.now(
-                                                                           pytz.timezone('Asia/Kolkata')).hour,
-                                                                       datetime.datetime.now(
-                                                                           pytz.timezone(
-                                                                               'Asia/Kolkata')).minute,
-                                                                       datetime.datetime.now(
-                                                                           pytz.timezone(
-                                                                               'Asia/Kolkata')).second))
+                self.logger.debug('{} went long at price-{}'.format(self.symbol,self.price))
                 token_dict[self.symbol]['LAST_ENTRY'] = float(token_dict[self.symbol]["LP"])
                 self.long_entry_price.append(float(token_dict[self.symbol]["LP"]))
 
@@ -666,14 +659,9 @@ class check_entries(threading.Thread):
         while self.first_trade:
             #print(f'{self.symbol}in self.first_trade:')
             self.short_entry_price.append(self.price)
-            self.logger.debug('{} went short at price-{}, time-{}:{}:{}'.format(self.symbol,
-                                                                    self.price,
-                                                                    datetime.datetime.now(
-                                                                        pytz.timezone('Asia/Kolkata')).hour,
-                                                                    datetime.datetime.now(
-                                                                        pytz.timezone('Asia/Kolkata')).minute,
-                                                                    datetime.datetime.now(
-                                                                        pytz.timezone('Asia/Kolkata')).second))
+            self.logger.debug('{} went short at price-{}, Reason: {}, EMA: {}, FCH:{}'.format(self.symbol,
+                                                                    self.price,reason, self.ema, self.first_candle_high
+                                                                    ))
             self.first_trade = False
             self.sht = True
             token_dict[self.symbol]["POS"] = "SHORT"
@@ -702,16 +690,8 @@ class check_entries(threading.Thread):
                 token_dict[self.symbol]["POS"] = "SHORT"
                 # self.lng = False
                 self.sht_counter = 0
-                self.logger.debug('{} went short at price-{}, time-{}:{}:{}'.format(self.symbol,
-                                                                        self.price,
-                                                                        datetime.datetime.now(
-                                                                            pytz.timezone('Asia/Kolkata')).hour,
-                                                                        datetime.datetime.now(
-                                                                            pytz.timezone(
-                                                                                'Asia/Kolkata')).minute,
-                                                                        datetime.datetime.now(
-                                                                            pytz.timezone(
-                                                                                'Asia/Kolkata')).second))
+                self.logger.debug('{} went short at price-{}'.format(self.symbol,
+                                                                        self.price))
                 token_dict[self.symbol]['LAST_ENTRY'] = float(token_dict[self.symbol]["LP"])
                 # self.long_exit_price.append(float(token_dict[self.symbol]["LP"]))
                 self.short_entry_price.append(float(token_dict[self.symbol]["LP"]))
@@ -763,7 +743,7 @@ class check_entries(threading.Thread):
         if (token_dict[self.symbol]['LP'] > pivot) and self.sht == True:
             sleep(6)
             if (token_dict[self.symbol]['LP'] > pivot) and self.sht == True:
-                print('square-off {} at price {}'.format(self.symbol, token_dict[self.symbol]['LP']))
+                print('square-off {} at price {}, EMA:{}, FCH:{}'.format(self.symbol, token_dict[self.symbol]['LP'], self.ema, self.first_candle_high))
                 token_dict[self.symbol]['POS'] = ' '
                 self.short_exit_price.append(token_dict[self.symbol]['LP'])
                 self.sht = False
@@ -788,14 +768,8 @@ class check_entries(threading.Thread):
 
     def hedge(self):
         self.go_long(0,'HEDGE')
-        self.logger.debug('HEDGE-{} went long at price-{}, time-{}:{}:{}'.format(self.symbol,
-                                                                     self.price,
-                                                                     datetime.datetime.now(
-                                                                         pytz.timezone('Asia/Kolkata')).hour,
-                                                                     datetime.datetime.now(
-                                                                         pytz.timezone('Asia/Kolkata')).minute,
-                                                                     datetime.datetime.now(
-                                                                         pytz.timezone('Asia/Kolkata')).second))
+        self.logger.debug('HEDGE-{} went long at price-{}'.format(self.symbol,
+                                                                     self.price))
 
         start_time = int(9) * 60 * 60 + int(19) * 60 + int(30)
         time_now = (datetime.datetime.now(pytz.timezone('Asia/Kolkata')).hour * 60 * 60 + datetime.datetime.now(
@@ -970,8 +944,8 @@ def stuff():
         
     
         updated_html = updated_html + """
-        <tr style="background-color: {background_color};">
-            <td>  {instrument}   </td>
+        <tr style="background-color: {background_color};">   
+            <td onclick="showPopup_positionalData('{instrument}')">  {instrument}   </td>
             <td>  {lp}   </td>
             <td>  {pos}   </td>
             <td onclick="showPopup('{instrument}')" style="color:{font_color}">  {pnl}   </td>
@@ -1183,10 +1157,23 @@ def serve_file(filename):
         print('Error serving file:', e)
         return '', 500
 
+@app.route('/api/position_data/<filename>')
+def serve_position_file(filename):
+    try:
+        data_directory = os.path.join('instrument_data', filename,f'{filename}.log')
+    
+        # Send the file's content as the API response
+        return send_file(data_directory, mimetype='text/html')
+    except Exception as e:
+        print('Error serving file:', e)
+        return '', 500
+
 
 @app.route('/')
 def index():
-    return render_template('dy1.html')
+    # return render_template('dy1.html') 
+    return render_template('test_logging.html')
+
 
 def get_subscribe_list(banknifty_atm,nifty_atm,finnifty_atm,expiry_banknifty,expiry_nifty,expiry_finnifty):
     subscribe_list = [
@@ -1387,24 +1374,24 @@ if __name__ == '__main__':
         "waiting for ATM at 9:20, current time- {}:{}".format(datetime.datetime.now(pytz.timezone('Asia/Kolkata')).hour,
                                                               datetime.datetime.now(
                                                                   pytz.timezone('Asia/Kolkata')).minute))
-    if datetime.datetime.now(pytz.timezone('Asia/Kolkata')).hour >= 9 \
-                and datetime.datetime.now(pytz.timezone('Asia/Kolkata')).minute >= 31:
+    if datetime.datetime.now(pytz.timezone('Asia/Kolkata')).hour >= 00 \
+                and datetime.datetime.now(pytz.timezone('Asia/Kolkata')).minute >= 00:
                 minut = 31
     else:
         minut = 0
     while True:
-        if datetime.datetime.now(pytz.timezone('Asia/Kolkata')).hour >= 9 \
-                and datetime.datetime.now(pytz.timezone('Asia/Kolkata')).minute >= 31 \
+        if datetime.datetime.now(pytz.timezone('Asia/Kolkata')).hour >= 00 \
+                and datetime.datetime.now(pytz.timezone('Asia/Kolkata')).minute >= 00 \
                 and datetime.datetime.now(pytz.timezone('Asia/Kolkata')).second >= 00:
 
             global nifty_atm,banknifty_atm,finnifty_atm
-            nifty_atm = int(round(float(token_dict['NIFTY_SPOT']["LP"]), -2))
-            banknifty_atm = int(round(float(token_dict['BANKNIFTY_SPOT']["LP"]), -2))
-            finnifty_atm = int(round(float(token_dict['FINNIFTY_SPOT']["LP"]), -2))
+            # nifty_atm = int(round(float(token_dict['NIFTY_SPOT']["LP"]), -2))
+            # banknifty_atm = int(round(float(token_dict['BANKNIFTY_SPOT']["LP"]), -2))
+            # finnifty_atm = int(round(float(token_dict['FINNIFTY_SPOT']["LP"]), -2))
 
-            # nifty_atm = 19600
-            # banknifty_atm = 45400
-            # finnifty_atm = 20000
+            nifty_atm = 19800
+            banknifty_atm = 44900
+            finnifty_atm = 20000
 
             print("Nifty atm = {} \nBanknifty atm = {} \nFinnifty atm = {}".format(nifty_atm, banknifty_atm, finnifty_atm))
             break
