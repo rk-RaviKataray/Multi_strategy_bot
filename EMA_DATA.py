@@ -22,7 +22,7 @@ def gen_data():
 
     date_ = datetime.datetime.now(pytz.timezone('Asia/Kolkata'))
     today = date_.strftime('%A')
-    
+
 
     # User Credential
     user_id = '771791'
@@ -50,15 +50,18 @@ def gen_data():
     fin_nifty = alice.get_scrip_info(alice.get_instrument_by_token('INDICES', 26037))
     sensex = alice.get_scrip_info(alice.get_instrument_by_token('INDICES', 1)) 
 
+    #print(nifty)
+
 
 
     print("STEP-2: CALCULATING ATM AT CLOSE")
     #print(bank_nifty)
 
-    nifty_close_atm = round(float(nifty['PrvClose']), -2)
-    bank_nifty_close_atm = round(float(bank_nifty['PrvClose']), -2)
-    fin_nifty_close_atm = round(float(fin_nifty['PrvClose']), -2)
-    sensex_close_atm = round(float(sensex['PrvClose']), -2)
+    nifty_close_atm = round(float(nifty['LTP']), -2)
+    #print(nifty_close_atm)
+    bank_nifty_close_atm = round(float(bank_nifty['LTP']), -2)
+    fin_nifty_close_atm = round(float(fin_nifty['LTP']), -2)
+    sensex_close_atm = round(float(sensex['LTP']), -2)
 
 
 
@@ -68,11 +71,11 @@ def gen_data():
     df_bse = pd.read_csv('BFO.csv')
     
 
-    expiry_nifty_df = df[df['Symbol'] == 'NIFTY']
-    expiry_bnnifty_df = df[df['Symbol'] == 'BANKNIFTY']
-    expiry_finnifty_df = df[df['Symbol'] == 'FINNIFTY']
+    expiry_nifty_df = df_nse[df_nse['Symbol'] == 'NIFTY']
+    expiry_bnnifty_df = df_nse[df_nse['Symbol'] == 'BANKNIFTY']
+    expiry_finnifty_df = df_nse[df_nse['Symbol'] == 'FINNIFTY']
 
-    expiry_sensex_df = df[df['Symbol'] == 'SENSEX']
+    expiry_sensex_df = df_bse[df_bse['Symbol'] == 'SENSEX']
 
 
     expiry_nifty = expiry_nifty_df['Expiry Date'].sort_values().drop_duplicates().reset_index(drop=True)
@@ -105,18 +108,31 @@ def gen_data():
 
 
 
-    def create_dic(symbol, expiry, strike, o_type, expiry_):
+    def create_dic(symbol, expiry, strike, o_type, expiry_,exchange):
         try:
+
             base_symbol = symbol
-            option_type = "C" if o_type == "CE" else "P"
+               
             striki = str(int(strike))
-            trading_symbol = base_symbol + expiry_ + option_type + striki
+
+            if exchange == 'NSE':
+             
+                option_type = "C" if o_type == "CE" else "P"
+            
+                trading_symbol = base_symbol + expiry_ + option_type + striki
+
+            elif exchange == 'BSE':
+               
+                option_type = "CE" if o_type == "CE" else "PE"
+            
+                trading_symbol = base_symbol + expiry_ +   striki + option_type
+
 
             date_ = datetime.datetime.now(pytz.timezone('Asia/Kolkata'))
             if date_.strftime('%A') == 'Monday':
                 days = 3
             else:
-                days = 1                                                     #                <-----------------------------
+                days = 1                                                  #                <-----------------------------
 
             instrument = alice.get_instrument_for_fno(exch='NFO', symbol=symbol, expiry_date=expiry, is_fut=False,
                                                     strike=strike, is_CE=True if o_type == "CE" else False)
@@ -129,7 +145,7 @@ def gen_data():
             interval = "1"  # ["1", "D"]
             indices = False  # For Getting index data
             df_ = alice.get_historical(instrument, from_datetime, to_datetime, interval, indices)
-            print(df_)
+            #print(df_)
             lst = []
             for i in range(len(df_)):
                 if (int(df_['datetime'][i].split(' ')[1].split(':')[1])) % 15 == 14:
@@ -161,38 +177,47 @@ def gen_data():
     print("NON TRADABLE INSTRUMENTS BANKNIFTY:")
 
     for x in range(-20, 20):
-        create_dic("BANKNIFTY", banknifty_expiry, int(bank_nifty_close_atm) + (x * 100), "CE", expiry_format_banknifty)
+        create_dic("BANKNIFTY", banknifty_expiry, int(bank_nifty_close_atm) + (x * 100), "CE", expiry_format_banknifty ,'NSE')
         
-        create_dic("BANKNIFTY", banknifty_expiry, int(bank_nifty_close_atm) + (x * 100), "PE", expiry_format_banknifty)
+        create_dic("BANKNIFTY", banknifty_expiry, int(bank_nifty_close_atm) + (x * 100), "PE", expiry_format_banknifty,'NSE')
     
     sleep(65)
 
     print("STEP-4: GENERATING DATA FOR NIFTY........")
     print("NON TRADABLE INSTRUMENTS NIFTY:")
 
+
     for x in range(-10, 11):
-        create_dic("NIFTY", nifty_expiry, nifty_close_atm + (x * 100), "CE", expiry_format_nifty)
-        create_dic("NIFTY", nifty_expiry, nifty_close_atm + (x * 100), "PE", expiry_format_nifty)
+        create_dic("NIFTY", nifty_expiry, nifty_close_atm + (x * 50), "CE", expiry_format_nifty,'NSE')
+        create_dic("NIFTY", nifty_expiry, nifty_close_atm + (x * 50), "PE", expiry_format_nifty,'NSE')
     sleep(65)
 
-    if today == 'Friday':
+    print("STEP-5: GENERATING DATA FOR FINNIFTY........")
+    print("NON TRADABLE INSTRUMENTS FINNIFTY:")
 
-        print("STEP-5: GENERATING DATA FOR SENSEX........")
-        print("NON TRADABLE INSTRUMENTS SENSEX:")
-
-
-        for x in range(-20, 20):
-            create_dic("SENSEX", sensex_expiry, sensex_close_atm + (x * 100), "CE", expiry_format_sensex)
-            create_dic("SENSEX", sensex_expiry, sensex_close_atm + (x * 100), "PE", expiry_format_sensex)
-
-    else:
-        print("STEP-5: GENERATING DATA FOR FINNIFTY........")
-        print("NON TRADABLE INSTRUMENTS FINNIFTY:")
+    for x in range(-10, 11):
+             create_dic("FINNIFTY", finnifty_expiry, fin_nifty_close_atm + (x * 50), "CE", expiry_format_finnifty,'NSE')
+             create_dic("FINNIFTY", finnifty_expiry, fin_nifty_close_atm + (x * 50), "PE", expiry_format_finnifty,'NSE')
 
 
-        for x in range(-10, 11):
-            create_dic("FINNIFTY", finnifty_expiry, fin_nifty_close_atm + (x * 100), "CE", expiry_format_finnifty)
-            create_dic("FINNIFTY", finnifty_expiry, fin_nifty_close_atm + (x * 100), "PE", expiry_format_finnifty)
+    # if today == 'Friday':
+
+    #     print("STEP-5: GENERATING DATA FOR SENSEX........")
+    #     print("NON TRADABLE INSTRUMENTS SENSEX:")
+
+
+    #     for x in range(-20, 20):
+    #         create_dic("SENSEX", sensex_expiry, sensex_close_atm + (x * 100), "CE", expiry_format_sensex)
+    #         create_dic("SENSEX", sensex_expiry, sensex_close_atm + (x * 100), "PE", expiry_format_sensex)
+
+    # else:
+    #     print("STEP-5: GENERATING DATA FOR FINNIFTY........")
+    #     print("NON TRADABLE INSTRUMENTS FINNIFTY:")
+
+
+    #     for x in range(-10, 11):
+    #         create_dic("FINNIFTY", finnifty_expiry, fin_nifty_close_atm + (x * 100), "CE", expiry_format_finnifty)
+    #         create_dic("FINNIFTY", finnifty_expiry, fin_nifty_close_atm + (x * 100), "PE", expiry_format_finnifty)
 
     if os.path.exists("data_ema.json"):
         os.remove("data_ema.json")

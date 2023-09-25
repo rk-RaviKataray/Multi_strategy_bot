@@ -13,6 +13,7 @@ from multiprocessing import Process
 from UltraDict import UltraDict
 import retrying
 from flask_cors import CORS
+import multiprocessing
 
 def is_current_date_greater_than_latest_expiry(string_input_with_date):
     # string_input_with_date = "2023-08-03"
@@ -125,6 +126,13 @@ df = pd.read_csv('NFO.csv')
 expiry_nifty_df = df[df['Symbol'] == 'NIFTY']
 expiry_bnnifty_df = df[df['Symbol'] == 'BANKNIFTY']
 expiry_finnifty_df = df[df['Symbol'] == 'FINNIFTY']
+
+nifty_lot_size = df[df['Symbol'] == 'NIFTY']['Lot Size']
+banknifty_lot_size = df[df['Symbol'] == 'BANKNIFTY']['Lot Size']
+finnifty_lot_size = df[df['Symbol'] == 'FINNIFTY']['Lot Size']
+
+
+
 expiry_nifty = expiry_nifty_df['Expiry Date'].sort_values().drop_duplicates().reset_index(drop=True)
 expiry_banknifty = expiry_bnnifty_df['Expiry Date'].sort_values().drop_duplicates().reset_index(drop=True)
 expiry_finnifty = expiry_finnifty_df['Expiry Date'].sort_values().drop_duplicates().reset_index(drop=True)
@@ -218,6 +226,10 @@ def socket():
 
     alice.subscribe(subscribe_list)
 
+def start_thread(obj_list):
+   
+    [x.start() for x in obj_list]
+
 
 class processing_multi(Process):
 
@@ -291,6 +303,8 @@ class check_entries(threading.Thread):
 
     def run(self):
 
+        self.logger.debug(f'************* NEW_SESSION *************')
+
         if not os.path.exists(f"./instrument_data/{self.symbol}"):
             os.makedirs(f"./instrument_data/{self.symbol}")
 
@@ -311,8 +325,8 @@ class check_entries(threading.Thread):
             token_dict[self.symbol]["QUANTITY"] = self.quantity
 
 
-            while True:
-                sleep(1)
+            # while True:
+            #     sleep(1)
 
 
             if self.is_hedge:
@@ -349,6 +363,7 @@ class check_entries(threading.Thread):
             self.ema = self.get_ema_25()
             token_dict[self.symbol]["EMA"] = self.ema
             while True:
+                
                 while start_time < \
                         (datetime.datetime.now(pytz.timezone('Asia/Kolkata')).hour * 60 * 60 + datetime.datetime.now(
                             pytz.timezone('Asia/Kolkata')).minute * 60 + datetime.datetime.now(
@@ -439,6 +454,7 @@ class check_entries(threading.Thread):
                                             self.temp_closing_candle_variable = token_dict[self.symbol]["LP"]
                                             #print(f'{self.symbol}waiting for candle too close')
                                             break
+                                            sleep(0.5)
 
                                     if self.temp_closing_candle_variable < self.first_candle_high:
                                         #print(
@@ -507,6 +523,7 @@ class check_entries(threading.Thread):
                                         self.temp_closing_candle_variable = token_dict[self.symbol]["LP"]
                                         #print(f'{self.symbol}waiting for candle to close')
                                         break
+                                        sleep(0.5)
 
                                 if self.temp_closing_candle_variable < self.first_candle_high:
                                     #print(f'{self.symbol}in self.temp_closing_candle_variable < self.first_candle_high:')
@@ -579,6 +596,8 @@ class check_entries(threading.Thread):
                                     self.temp_closing_candle_variable = token_dict[self.symbol]["LP"]
                                     #print(f'{self.symbol}waiting for candle to close')
                                     break
+                                    sleep(0.5)
+
                             if self.temp_closing_candle_variable > self.ema:
                                 # print(f'{self.symbol}self.temp_closing_candle_variable > self.ema:')
                                 # print(f'{self.symbol}go_lng')
@@ -690,8 +709,9 @@ class check_entries(threading.Thread):
                 token_dict[self.symbol]["POS"] = "SHORT"
                 # self.lng = False
                 self.sht_counter = 0
-                self.logger.debug('{} went short at price-{}'.format(self.symbol,
-                                                                        self.price))
+                self.logger.debug('{} went short at price-{}, Reason: {}, EMA: {}, FCH:{}'.format(self.symbol,
+                                                                    self.price,reason, self.ema, self.first_candle_high
+                                                                    ))
                 token_dict[self.symbol]['LAST_ENTRY'] = float(token_dict[self.symbol]["LP"])
                 # self.long_exit_price.append(float(token_dict[self.symbol]["LP"]))
                 self.short_entry_price.append(float(token_dict[self.symbol]["LP"]))
@@ -743,7 +763,7 @@ class check_entries(threading.Thread):
         if (token_dict[self.symbol]['LP'] > pivot) and self.sht == True:
             sleep(6)
             if (token_dict[self.symbol]['LP'] > pivot) and self.sht == True:
-                print('square-off {} at price {}, EMA:{}, FCH:{}'.format(self.symbol, token_dict[self.symbol]['LP'], self.ema, self.first_candle_high))
+                self.logger.debug('square-off {} at price {}, EMA:{}, FCH:{}'.format(self.symbol, token_dict[self.symbol]['LP'], self.ema, self.first_candle_high))
                 token_dict[self.symbol]['POS'] = ' '
                 self.short_exit_price.append(token_dict[self.symbol]['LP'])
                 self.sht = False
@@ -759,10 +779,12 @@ class check_entries(threading.Thread):
                                                                              self.short_exit_price[
                                                                                  len(self.short_exit_price) - 1]) * self.quantity)
                     self.logger.debug(f'short pnl booked until now:{self.short_pnl_booked}')
-
-                    self.short_brokerage = self.short_brokerage + self.calc_brokerage(
+                    brokerage = self.calc_brokerage(
                         self.short_entry_price[len(self.short_entry_price) - 1], self.short_exit_price[
                             len(self.short_exit_price) - 1], "SHORT")
+                    self.logger.debug(f'Brokerage:{brokerage}')
+
+                    self.short_brokerage = self.short_brokerage + brokerage
                 return True
         return False
 
@@ -1371,27 +1393,28 @@ if __name__ == '__main__':
     expiry_format_finnifty = get_expiry_date_trading_symbol(str(expiry_finnifty))
 
     print(
-        "waiting for ATM at 9:20, current time- {}:{}".format(datetime.datetime.now(pytz.timezone('Asia/Kolkata')).hour,
+        "waiting for ATM at 9:30, current time- {}:{}".format(datetime.datetime.now(pytz.timezone('Asia/Kolkata')).hour,
                                                               datetime.datetime.now(
                                                                   pytz.timezone('Asia/Kolkata')).minute))
-    if datetime.datetime.now(pytz.timezone('Asia/Kolkata')).hour >= 00 \
-                and datetime.datetime.now(pytz.timezone('Asia/Kolkata')).minute >= 00:
+    if datetime.datetime.now(pytz.timezone('Asia/Kolkata')).hour >= 9 \
+                and datetime.datetime.now(pytz.timezone('Asia/Kolkata')).minute >= 31:
                 minut = 31
     else:
         minut = 0
     while True:
-        if datetime.datetime.now(pytz.timezone('Asia/Kolkata')).hour >= 00 \
-                and datetime.datetime.now(pytz.timezone('Asia/Kolkata')).minute >= 00 \
+        if datetime.datetime.now(pytz.timezone('Asia/Kolkata')).hour >= 9 \
+                and datetime.datetime.now(pytz.timezone('Asia/Kolkata')).minute >= 31 \
                 and datetime.datetime.now(pytz.timezone('Asia/Kolkata')).second >= 00:
 
             global nifty_atm,banknifty_atm,finnifty_atm
-            # nifty_atm = int(round(float(token_dict['NIFTY_SPOT']["LP"]), -2))
-            # banknifty_atm = int(round(float(token_dict['BANKNIFTY_SPOT']["LP"]), -2))
-            # finnifty_atm = int(round(float(token_dict['FINNIFTY_SPOT']["LP"]), -2))
+            
+            nifty_atm = int(round(float(token_dict['NIFTY_SPOT']["LP"])/100)*100)
+            banknifty_atm = int(round(float(token_dict['BANKNIFTY_SPOT']["LP"]), -2))
+            finnifty_atm = int(round(float(token_dict['FINNIFTY_SPOT']["LP"])/100)*100)
 
-            nifty_atm = 19800
-            banknifty_atm = 44900
-            finnifty_atm = 20000
+            # nifty_atm = 20100
+            # banknifty_atm = 45700
+            # finnifty_atm = 20300
 
             print("Nifty atm = {} \nBanknifty atm = {} \nFinnifty atm = {}".format(nifty_atm, banknifty_atm, finnifty_atm))
             break
@@ -1493,11 +1516,8 @@ if __name__ == '__main__':
                               finnifty_quantity,is_hedge=False)
     FN_OTM_CE_50 = check_entries(str(get_symbol('FINNIFTY', finnifty_atm, 100, 'C', expiry_format_finnifty)),
                                  finnifty_quantity,is_hedge=False)
-    FN_OTM_PE_50 = check_entries(str(get_symbol('FINNIFTY', finnifty_atm, 100, 'P', expiry_format_finnifty)),
+    FN_OTM_PE_50 = check_entries(str(get_symbol('FINNIFTY', finnifty_atm, -100, 'P', expiry_format_finnifty)),
                                  finnifty_quantity,is_hedge=False)
-    FN_ITM_CE_50 = check_entries(str(get_symbol('FINNIFTY', finnifty_atm, -100, 'P', expiry_format_finnifty)),
-                                 finnifty_quantity,is_hedge=False)
-    
     
     
     FN_HEDGE_CE_50 = check_entries(str(get_symbol('FINNIFTY', finnifty_atm, 50, 'C', expiry_format_finnifty)),
@@ -1562,7 +1582,7 @@ if __name__ == '__main__':
                     ]
     FN_put_list = [FN_ATM_PE,
                    # , FN_OTM_PE_50,
-                   FN_ITM_CE_50]
+                   FN_OTM_PE_50]
 
     FN_call_list_HEDGE = [FN_HEDGE_CE, FN_HEDGE_CE_50,FN_HEDGE_PE, FN_HEDGE_PE_50 ]
     FN_put_list_HEDGE= [FN_HEDGE_PE, FN_HEDGE_PE_50 ]
@@ -1589,10 +1609,10 @@ if __name__ == '__main__':
     # p = Process(target=app.run())
     # p.start()
 
-    N_CALL_PROCESS = processing_multi(N_call_list)
-    N_PUT_PROCESS = processing_multi(N_put_list)
+    N_CALL_PROCESS =  processing_multi(N_call_list) #multiprocessing.Process(target=start_thread(N_call_list))
+    N_PUT_PROCESS = multiprocessing.Process(target=start_thread(N_put_list)) #processing_multi(N_put_list)
 
-    N_CALL_HEDGE_PROCESS = processing_multi(N_call_list_HEDGE)
+    N_CALL_HEDGE_PROCESS = processing_multi(N_call_list_HEDGE) #multiprocessing.Process(target=start_thread(N_call_list_HEDGE)) #
     #N_PUT_HEDGE_PROCESS = processing_multi(N_put_list_HEDGE)
 
     # N_PROCESS1 = processing_multi(N_list1)
@@ -1607,10 +1627,10 @@ if __name__ == '__main__':
 
     # app.run()
 
-    BN_CALL_PROCESS = processing_multi(BN_call_list)  # BN_HEDGE_CE
-    BN_PUT_PROCESS = processing_multi(BN_put_list)  # BN_HEDGE_PE
+    BN_CALL_PROCESS = processing_multi(BN_call_list) #multiprocessing.Process(target=start_thread(BN_call_list)) #  # BN_HEDGE_CE
+    BN_PUT_PROCESS = processing_multi(BN_put_list) #multiprocessing.Process(target=start_thread(BN_put_list)) #  # BN_HEDGE_PE
 
-    BN_CALL_HEDGE_PROCESS = processing_multi(BN_call_list_HEDGE)
+    BN_CALL_HEDGE_PROCESS = processing_multi(BN_call_list_HEDGE) #multiprocessing.Process(target=start_thread(BN_call_list_HEDGE)) #
     #BN_PUT_HEDGE_PROCESS = processing_multi(BN_put_list_HEDGE)
 
     # BN_PROCESS1 = processing_multi(BN_list1)
@@ -1621,10 +1641,10 @@ if __name__ == '__main__':
     # BN_PROCESS6 = processing_multi(BN_list6)
     # BN_PROCESS7 = processing_multi(BN_list7)
 
-    FN_CALL_PROCESS = processing_multi(FN_call_list)
-    FN_PUT_PROCESS = processing_multi(FN_put_list)
+    FN_CALL_PROCESS = processing_multi(FN_call_list) #multiprocessing.Process(target=start_thread(FN_call_list)) #
+    FN_PUT_PROCESS = processing_multi(FN_put_list) #multiprocessing.Process(target=start_thread(FN_put_list)) #
 
-    FN_CALL_HEDGE_PROCESS = processing_multi(FN_call_list_HEDGE)
+    FN_CALL_HEDGE_PROCESS = processing_multi(FN_call_list_HEDGE)# multiprocessing.Process(target=start_thread(FN_call_list_HEDGE)) #
     #FN_PUT_HEDGE_PROCESS = processing_multi(FN_put_list_HEDGE)
 
     # N_PROCESS1.start()
