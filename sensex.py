@@ -326,7 +326,7 @@ class check_entries(threading.Thread):
             elif self.symbol[0] == "N":
                 symbol_ = 'NIFTY'
                 expiry_date_ = str(expiry_nifty)
-            elif self.symbol[0] == "F":
+            elif self.symbol[0] == "S":
                 symbol_ = 'SENSEX'
                 expiry_date_ = str(expiry_sensex)
 
